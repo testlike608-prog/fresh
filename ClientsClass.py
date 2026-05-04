@@ -1,0 +1,278 @@
+import socket
+import threading
+import time
+import queue
+import pyodbc
+import os
+import textwrap
+from datetime import datetime
+import csv
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# General Class
+class  TCPClient():
+    def __init__(self, ip, port, timeout=None, buffer_size=4096):
+        """
+        :param timeout: لو خليته None هيفضل مستني للأبد لحد ما السيرفر يرد
+        """
+        self.ip = ip
+        self.port = port
+        self.timeout = timeout
+        self.buffer_size = buffer_size
+        self.sock = None  # هنا هنحتفظ بالسوكيت عشان يفضل مفتوح
+        self.connected = False
+        self._send_queue: "queue.Queue[dict]" = queue.Queue()
+        self._log_lock = threading.Lock()
+        self._log_seq = 0
+        self._log = list()
+        self.name =""
+        self.current_program_label =""
+        self.current_program_data=""
+
+        self.shared_queue = queue.Queue()
+        self.shared_queue2= queue.Queue() #FOR DUMMY shared between scanner and data proccesing function 
+        self.shared_queue3= queue.Queue() # for dummies shared between scanner and i/o writer function
+
+    def connect(self):
+        """دالة لفتح الاتصال مرة واحدة"""
+        try:
+            if self.connected:
+                print(f"[{self.ip}] Already connected.")
+                return True
+            
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.settimeout(self.timeout) # تحديد وقت الانتظار (أو None للانتظار الدائم)
+            self.sock.connect((self.ip, self.port))
+            self.connected = True
+            print(f"[{self.ip}] : [{self.port}] Connected successfully.")
+            return True
+        except Exception as e:
+            print(f"[{self.ip}] : [{self.port}] Connection Failed: {e}")
+            self.connected = False
+            return False
+            
+    def ensure_connected(self):
+        """تتأكد إننا متصلين، ولو مش متصلين تحاول للأبد"""
+        while not self.connected:
+            self._log_add("INFO", f"Trying to reconnect to {self.ip}...")
+            if self.connect():
+                self._log_add("INFO", "✅ Reconnected successfully!")
+                break
+            else:
+                self._log_add("WARNING", "❌ Retrying in 5 seconds...")
+                time.sleep(5)    
+    
+    def start_reconnection_watchdog(self):
+        """تشغيل خيط المراقبة في الخلفية"""
+        thread = threading.Thread(target=self._connection_monitor, daemon=True)
+        thread.start()
+
+    def _connection_monitor(self):
+        """الدالة اللي بتراقب الاتصال كل كام ثانية"""
+        while True:
+            if not self.connected:
+                # لو لقيناه فصل، نصلحه
+                self.ensure_connected()
+            else:
+                # لو متصل، نتأكد إنه "فعلاً" لسه شغال
+                try:
+                    # محاولة إرسال بايت فارغ للتأكد من الـ Socket
+                    # MSG_PEEK بتشوف الداتا من غير ما تسحبها، أو ابعت حرف تافه لو السيرفر بيسمح
+                    self.sock.send(b'', socket.MSG_OOB) 
+                except Exception:
+                    self._log_add("WARNING", "⚠️ Connection lost in background!")
+                    self.connected = False
+            
+            time.sleep(3) # افحص كل 3 ثواني
+    
+    def _get_sock(self):
+         
+        local_ip, local_port = self.sock.getsockname()
+        return local_ip,local_port
+   
+    def send_request(self, message , is_hex=False):
+        """
+        إرسال واستقبال فقط (بدون إغلاق الاتصال)
+        """
+        if not self.connected or self.sock is None:
+            print(f"[{self.ip}]:[{self.port}] Error: Not connected! Trying to connect...")
+            self.ensure_connected()
+           
+
+        try:
+            # 1. تجهيز الرسالة
+            data_to_send = None
+            if isinstance(message, bytes):
+                data_to_send = message
+            elif is_hex:
+                data_to_send = bytes.fromhex(message)
+            else:
+                data_to_send = message.encode('utf-8')
+                #data_to_send = [chunk.encode('utf-8') for chunk in message]
+
+            # 2. الإرسال
+           
+            self.sock.sendall(data_to_send)
+
+            # 3. الاستقبال (هنا هيفضل مستني لحد ما السيرفر يرد)
+            # طالما timeout=None أو وقت كبير، هيفضل واقف هنا (Blocking)
+            response = self.sock.recv(self.buffer_size)
+
+            return  response
+
+        except (socket.timeout):
+            print(f"[{self.ip}]:[{self.port}] Timeout: Server took too long to respond.")
+            return None
+
+        except (OSError, BrokenPipeError, ConnectionResetError, socket.error) as e:
+            # ⚠️ هنا أهم تعديل: لو حصل أي خطأ في السوكيت (السيرفر قفل أو السلك اتشال)
+            print(f"[{self.ip}]:[{self.port}] Connection Lost ({e}). Reconnecting...")
+            
+            self.connected = False
+            if self.sock:
+                try:
+                    self.sock.close()
+                except:
+                    pass
+                self.sock = None
+            
+            # محاولة إعادة الاتصال فوراً
+            self.ensure_connected()
+            
+            # اختياري: ممكن تخليها تحاول تبعت الرسالة تاني بعد ما رجع الاتصال
+            # return self.send_request(message, is_hex) 
+            return None
+
+        except Exception as e:
+            print(f"[{self.ip}]:[{self.port}] General Error: {e}")
+            return None
+    
+    '''
+    def _start_monitoring(self):
+        """بدء خيط المراقبة"""
+        if self._monitor_thread is None or not self._monitor_thread.is_alive():
+            self._stop_monitor.clear()
+            self._monitor_thread = threading.Thread(target=self._monitor_connections, daemon=True)
+            self._monitor_thread.start()
+
+    def _monitor_connections(self):
+        """فانكشن المراقبة اللي بتشيك على حالة الاتصال كل فترة"""
+        print(f"[{self.ip}] Connection monitor started.")
+        while not self._stop_monitor.is_set():
+            if self.connected and self.sock:
+                try:
+                    # بنبعث "بيانات فارغة" عشان نختبر لو السوكيت لسه شغال (Keep-alive check)
+                    # MSG_PEEK بيشوف البيانات من غير ما يسحبها من البافر
+                    self.sock.send(b"", socket.MSG_DONTWAIT)
+                except (OSError, BrokenPipeError):
+                    print(f"[{self.ip}] Monitor detected broken connection!")
+                    self.connected = False
+                    # هنا ممكن تختار تنادي self.connect() تاني لو عايز Auto-reconnect
+                    break
+            time.sleep(5)  # شيك كل 5 ثواني مثلاً
+     
+   '''
+    
+    def disconnect(self):
+        """إغلاق الاتصال وإيقاف المونيتور"""
+        self._stop_monitor.set() # وقف اللوب في المونيتور
+        if self.sock:
+            try:
+                self.sock.close()
+            except:
+                pass
+        self.sock = None
+        self.connected = False
+        print(f"[{self.ip}] Connection Closed.")
+
+    def _log_add(self, level: str, msg: str):
+        with self._log_lock:
+            self._log_seq += 1
+            self._log.append((self._log_seq, time.time(), level, msg))
+            if len(self._log) > 5000:
+                self._log = self._log[-3000:]
+        print(f"[{self.name}][{level}] {msg}")
+    
+    def start_listening(self, callback=None):
+        """
+        دالة لبدء عملية الاستماع في Thread منفصل
+        :param callback: دالة اختيارية يتم استدعاؤها فور استلام بيانات
+        """
+        self.receive_queue = queue.Queue() # كيو لاستقبال البيانات
+        self.listen_thread = threading.Thread(target=self._listen_loop, args=(callback,), daemon=True)
+        self.listen_thread.start()
+        self._log_add("INFO", f"[{self.ip}] : [{self.port}] Started listening for incoming data...")
+        
+
+    def _listen_loop(self, callback):
+        """الـ Loop الداخلي اللي بيفضل مستني داتا"""
+        while self.connected:
+            try:
+                # الكود هيفضل واقف هنا لحد ما السيرفر يبعت حاجة
+                data = self.sock.recv(self.buffer_size)
+                
+                if not data:
+                    # لو السيرفر بعت داتا فاضية معناها قفل الاتصال
+                    print(f"[{self.ip}] Server closed the connection.")
+                    self.connected = False
+                    break
+                
+                if callback:
+                    callback(data)
+                # إضافة البيانات للكيو
+                #self.receive_queue.put(data)
+
+                # اختياري: تسجيل اللوج
+                # self._log_add("INFO", f"Received data: {data}")
+
+            except socket.timeout:
+                continue # لو حصل تايم أوت يرجع يحاول يستقبل تاني
+            except Exception as e:
+                if self.connected:
+                    print(f"[{self.ip}] Listening Error: {e}")
+                    self.connected = False
+                break
+
+    def get_last_received(self, block=False, timeout=None):
+        """دالة لسحب آخر داتا وصلت من الكيو"""
+        try:
+            return self.receive_queue.get(block=block, timeout=timeout)
+        except queue.Empty:
+            return None
+
+
+##################################################################
+class App():
+    def __init__(self):
+        
+        import tkinter as tk
+        self.root = tk.Tk()
+        self.root.title("TCP Client App")
+        self.root.geometry("400x300")
+        self.label = tk.Label(self.root, text="TCP Client Running...")
+        self.label.pack(pady=20)
+        
+    def run(self):
+        self.root.mainloop()
+
+##################################################################
+
+
+
+
+
