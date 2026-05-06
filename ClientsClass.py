@@ -9,12 +9,140 @@ from datetime import datetime
 import csv
 
 
+def barcode_processing_loop(barcode_data):
+    # مثال بسيط لمعالجة الباركود (تقدر تعدلها حسب احتياجاتك)
+    # return model, descrition, trig number
+    pass
 
+def result_handling ():
+    pass
 
+class TCPServer:
+    def __init__(self, ip="0.0.0.0", port=5000, timeout=None, buffer_size=4096):
+        """
+        :param ip: "0.0.0.0" تعني الاستماع على كل كروت الشبكة المتاحة
+        """
+        self.ip = ip
+        self.port = port
+        self.timeout = timeout
+        self.buffer_size = buffer_size
+        self.server_sock = None
+        self.running = False
+        
+        # إدارة الكلاينت المتصلين
+        self.clients = [] # قائمة لتخزين السوكيتس الخاصة بالكلاينتس
+        self._log_lock = threading.Lock()
+        self._log_seq = 0
+        self._log = list()
+        self.name = "TCP_SERVER"
 
+        # الكيوز (كما في الكود الخاص بك)
+        self.shared_queue = queue.Queue()
+        self.receive_queue = queue.Queue()
 
+    def start(self):
+        """بدء تشغيل السيرفر وحجز البورت"""
+        try:
+            self.server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            # SO_REUSEADDR عشان لو السيرفر قفل يفتح تاني فوراً على نفس البورت
+            self.server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.server_sock.bind((self.ip, self.port))
+            self.server_sock.listen(5) # أقصى عدد من الاتصالات المنتظرة
+            self.running = True
+            
+            # تشغيل خيط لاستقبال الكلاينتس الجدد
+            self.accept_thread = threading.Thread(target=self._accept_loop, daemon=True)
+            self.accept_thread.start()
+            
+            self._log_add("INFO", f"Server started on {self.ip}:{self.port}")
+            return True
+        except Exception as e:
+            self._log_add("ERROR", f"Failed to start server: {e}")
+            return False
 
+    def _accept_loop(self):
+        """لوب دائم لاستقبال أي كلاينت بيحاول يتصل"""
+        while self.running:
+            try:
+                client_sock, addr = self.server_sock.accept()
+                self._log_add("INFO", f"New connection from {addr}")
+                
+                # تشغيل خيط خاص لكل كلاينت عشان السيرفر يخدم كذا حد في نفس الوقت
+                client_handler = threading.Thread(
+                    target=self._handle_client, 
+                    args=(client_sock, addr), 
+                    daemon=True
+                )
+                client_handler.start()
+                self.clients.append(client_sock)
+                
+            except Exception as e:
+                if self.running:
+                    self._log_add("ERROR", f"Accept error: {e}")
+                break
 
+    def _handle_client(self, client_sock, addr):
+        """الدالة اللي بتتعامل مع كل كلاينت لوحده (استقبال بيانات)"""
+        while self.running:
+            try:
+                data = client_sock.recv(self.buffer_size)
+                if not data:
+                    # لو الكلاينت قفل الاتصال
+                    break
+                
+                self._log_add("INFO", f"Received from {addr}: {data}")
+                self.receive_queue.put((addr, data)) # بنحط العنوان مع الداتا
+                
+                # مثال لرد تلقائي (Echo) لو حابب:
+                # client_sock.sendall(b"Message Received")
+
+            except Exception as e:
+                self._log_add("WARNING", f"Client {addr} disconnected: {e}")
+                break
+        
+        # تنظيف بعد ما الكلاينت يخرج
+        client_sock.close()
+        if client_sock in self.clients:
+            self.clients.remove(client_sock)
+        self._log_add("INFO", f"Connection closed for {addr}")
+
+    def broadcast(self, message, is_hex=False):
+        """إرسال رسالة لكل الكلاينتس المتصلين حالياً"""
+        data_to_send = self._prepare_data(message, is_hex)
+        for client in self.clients:
+            try:
+                client.sendall(data_to_send)
+            except:
+                pass # هنا السوكيت غالباً ميت، الـ handle_client هينظفه
+
+    def _prepare_data(self, message, is_hex):
+        if isinstance(message, bytes):
+            return message
+        elif is_hex:
+            return bytes.fromhex(message)
+        else:
+            return message.encode('utf-8')
+
+    def stop(self):
+        """إيقاف السيرفر تماماً"""
+        self.running = False
+        for client in self.clients:
+            client.close()
+        if self.server_sock:
+            self.server_sock.close()
+        self._log_add("INFO", "Server stopped.")
+
+    def _log_add(self, level: str, msg: str):
+        with self._log_lock:
+            self._log_seq += 1
+            self._log.append((self._log_seq, time.time(), level, msg))
+        print(f"[{self.name}][{level}] {msg}")
+
+    def get_last_received(self, block=False, timeout=None):
+        try:
+            return self.receive_queue.get(block=block, timeout=timeout)
+        except queue.Empty:
+            return None
 
 
 
@@ -256,21 +384,73 @@ class  TCPClient():
             return None
 
 
+    def send_only(self, message, is_hex=False):
+            """
+            إرسال رسالة فقط دون انتظار أي رد من السيرفر
+            """
+            if not self.connected or self.sock is None:
+                print(f"[{self.ip}]:[{self.port}] Error: Not connected! Trying to connect...")
+                if not self.connect():
+                    return False
+
+            try:
+                # 1. تجهيز الرسالة بنفس المنطق اللي استخدمته في send_request
+                data_to_send = None
+                if isinstance(message, bytes):
+                    data_to_send = message
+                elif is_hex:
+                    data_to_send = bytes.fromhex(message)
+                else:
+                    data_to_send = message.encode('utf-8')
+
+                # 2. الإرسال (sendall تضمن وصول البيانات بالكامل للـ Buffer)
+                self.sock.sendall(data_to_send)
+                
+                # اختياري: إضافة لوج للعملية
+                # self._log_add("INFO", f"Message sent (No response expected): {message}")
+                
+                return True
+
+            except (OSError, BrokenPipeError, ConnectionResetError, socket.error) as e:
+                print(f"[{self.ip}]:[{self.port}] Send Failed ({e}). Reconnecting...")
+                self.connected = False
+                if self.sock:
+                    try: self.sock.close()
+                    except: pass
+                    self.sock = None
+                return False
+                
+            except Exception as e:
+                print(f"[{self.ip}]:[{self.port}] General Error in send_only: {e}")
+                return False
+
 ##################################################################
 class App():
     def __init__(self):
         
-        import tkinter as tk
-        self.root = tk.Tk()
-        self.root.title("TCP Client App")
-        self.root.geometry("400x300")
-        self.label = tk.Label(self.root, text="TCP Client Running...")
-        self.label.pack(pady=20)
+        self.VisionClient = TCPClient("127.0.0.1", 8080)
+        self.VisionClient.start_reconnection_watchdog()
+        if self.VisionClient.connect():
+            self.VisionClient.start_listening()
+        else:
+            print("Failed to connect to Vision Server. Exiting.")
+            exit(1)
+    
+        self.cobotClient = TCPClient("192.168.57.2", 9000)
+        self.cobotClient.start_reconnection_watchdog()
         
+
+    def scanner_callback(self, data):
+        print(f"Data received from Vision Server: {data}")
+        # هنا ممكن تضيف أي معالجة إضافية للبيانات قبل ما تبعتها للكوبوت
+        self.cobotClient.send_only(data)
+
+
+
     def run(self):
         self.root.mainloop()
 
-##################################################################
+################################################################"""
 
 
 
