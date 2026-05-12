@@ -5,15 +5,7 @@ import pandas as pd
 import os
 from datetime import datetime
 
-wb = load_workbook('test.xlsx')
-sheet = wb.active
-
-# كتابة قيمة وتنسيقها
-sheet['A1'] = "Result"
-sheet['A1'].font = Font(bold=True, color="FF0000") # خط عريض ولون أحمر
-
-wb.save('test_styled.xlsx')
-
+import serial
 
 
 def get_image_path(image_name, folder_name="result_images"):
@@ -45,17 +37,20 @@ my_photo = "profile.jpeg"
 full_link = get_image_path(my_photo)
 print(full_link)
 """
-def result_reporting(ID, description, result, file_path="results_report.xlsx"):
-    image_name = f"{ID}.png"  # مثال على اسم صورة بناءً على البيانات
-    image_path = get_image_path(image_name)  # استخدم اسم صورة مناسب
-    # هنا تقدر تضيف الكود اللي بيكتب النتائج في ملف إكسل أو أي مكان تاني
-    # 1. تجهيز البيانات الجديدة في شكل قاموس
+def result_reporting(ID, description, serial_num, result, file_path="results_report.xlsx"):
+    image_path = []
+    for i in range(0, 4):  # لو حابب تضيف لحد 4 صور
+        image_path.append(get_image_path(f"{ID}_{i}.png"))
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     new_data = {
         'id': [ID],
         'description': [description],
-        'image path': [image_path],
+        'serial': [serial_num],
+        'image path1': [image_path[0]],
+        'image path2': [image_path[1]],  # لو حابب تضيف صورة تانية
+        'image path3': [image_path[2]],  # لو حابب تضيف صورة تانية
+        'image path4': [image_path[3]],  # لو حابب تضيف صورة تانية
         'result': [result],
         'timestamp': [current_time]
     }
@@ -114,5 +109,16 @@ def get_model_value(input_string , file_path, search_column):
 # --- تجربة الكود ---
 # لنفترض أن النص المدخل ينتهي بـ "B01" وتريد البحث عنه في عمود اسمه "Code"
 # ليجلب لك القيمة المقابلة في عمود "model"
-final_value = get_model_value("Project_B01", "production_data.xlsx", "Code")
-print(f"Model: {final_value}")
+if __name__ == "__main__":
+    # كود الاختبار اللي كان بيتنفذ على الـ import — الآن جواه __main__ guard
+    try:
+        wb = load_workbook('test.xlsx')
+        sheet = wb.active
+        sheet['A1'] = "Result"
+        sheet['A1'].font = Font(bold=True, color="FF0000")
+        wb.save('test_styled.xlsx')
+    except Exception as e:
+        print(f"Test workbook step skipped: {e}")
+
+    final_value = get_model_value("Project_B01", "production_data.xlsx", "Code")
+    print(f"Model: {final_value}")

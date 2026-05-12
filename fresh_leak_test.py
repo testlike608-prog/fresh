@@ -2,14 +2,31 @@ import sys
 import os
 import subprocess
 import datetime
+import time
+import queue
+import traceback
 import openpyxl
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QComboBox, QPushButton, QCheckBox, QFrame, QFileDialog,
-    QGraphicsDropShadowEffect, QSizePolicy
+    QGraphicsDropShadowEffect, QSizePolicy,QSplashScreen, QProgressBar
 )
 from PyQt5.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve, pyqtSignal, QThread
 from PyQt5.QtGui import QFont, QColor, QPalette, QPixmap, QPainter, QBrush, QPen, QLinearGradient
+
+# ─── BACK-END IMPORTS ─────────────────────────────────────────────────────────
+# بنستورد الموديولز بتاعة الباك اند بشكل آمن — لو فشل أي واحد منهم نكمل
+# على وضع "Demo" بدل ما الـ UI يقع تماماً.
+_BACKEND_IMPORT_ERROR = None
+try:
+    import scanner as scanner_backend
+    import excel as excel_backend
+    import ClientsClass as clients_backend
+    BACKEND_AVAILABLE = True
+except Exception as _e:
+    BACKEND_AVAILABLE = False
+    _BACKEND_IMPORT_ERROR = f"{type(_e).__name__}: {_e}"
+    print(f"⚠ Backend import failed → running in DEMO mode: {_BACKEND_IMPORT_ERROR}")
 
 # ─── CONFIG ───────────────────────────────────────────────────────────────────
 EXCEL_PATH = os.path.join(os.path.expanduser("~"), "Desktop", "Fresh_LeakTest_Results.xlsx")
@@ -179,6 +196,181 @@ class ResultBadge(QLabel):
             self.setStyleSheet(f"color: {theme['text_muted']}; letter-spacing: 4px;")
 
 
+# ─── BACK-END WORKER (QThread) ────────────────────────────────────────────────
+# الكلاس ده مسؤول عن تشغيل خطوات الـ Leak Test على ثريد منفصل عن الـ UI
+# عشان النافذة متجمدش لما الباك اند يكون مستني الباركود أو رد السيرفر.
+class LeakTestWorker(QThread):
+    # الإشارات اللي بنبعت بيها للـ UI
+    step_changed   = pyqtSignal(int)              # يتحدث الـ step indicator
+    status_changed = pyqtSignal(str)              # يتحدث الـ status bar
+    finished_ok    = pyqtSignal(str, str, str)    # (result, barcode, image_path)
+    failed         = pyqtSignal(str)              # رسالة خطأ
+
+    SCAN_TIMEOUT_SEC = 30        # الوقت اللي ننتظر فيه قراءة الباركود
+    VISION_TIMEOUT_SEC = 15      # وقت انتظار رد الفيجن
+    DEMO_DELAY = 1.0             # تأخير في وضع الـ demo
+
+    def __init__(self, app, model_name, demo_mode=False):
+        super().__init__()
+        self.app = app                  # ClientsClass.App() instance — أو None في الـ demo
+        self.model_name = model_name
+        self.demo_mode = demo_mode
+
+    # ─────────────────────────────────────────────────────────────────────
+    def run(self):
+        try:
+            # ── Step 0: SCAN ─────────────────────────────────────────────
+            self.step_changed.emit(0)
+            barcode = self._do_scan()
+            if barcode is None:
+                return  # الخطأ اتبعت من جوة _do_scan
+
+            # ── Step 1: PROCESSING ──────────────────────────────────────
+            self.step_changed.emit(1)
+            response = self._do_processing(barcode)
+
+            # ── Step 2: RESULT ──────────────────────────────────────────
+            self.step_changed.emit(2)
+            self.status_changed.emit("⏳  Evaluating result…")
+            result = self._interpret_result(response, barcode)
+            if self.demo_mode:
+                time.sleep(self.DEMO_DELAY)
+
+            # ── Step 3: SAVING ──────────────────────────────────────────
+            self.step_changed.emit(3)
+            self.status_changed.emit("⏳  Saving result to Excel…")
+            image_path = self._do_save(barcode, result)
+
+            # خلاص — كله تمام
+            self.finished_ok.emit(result, barcode, image_path)
+
+        except Exception as e:
+            traceback.print_exc()
+            self.failed.emit(f"Unexpected worker error: {e}")
+
+    # ─────────────────────────────────────────────────────────────────────
+    def _do_scan(self):
+        """خطوة الـ Scan — يستنى لحد ما الباركود يتقرا أو timeout."""
+        if self.demo_mode or self.app is None:
+            self.status_changed.emit("⏳  [DEMO] Simulating barcode scan…")
+            time.sleep(self.DEMO_DELAY)
+            return f"DEMO-{int(time.time())}"
+
+        self.status_changed.emit("⏳  Waiting for barcode scan…")
+        try:
+            scanner_backend.reset_queue()
+            scanner_backend.start_listener()
+            barcode = scanner_backend.queue_barcode.get(timeout=self.SCAN_TIMEOUT_SEC)
+            scanner_backend.flag_barcode = False
+            return barcode
+        except queue.Empty:
+            self.failed.emit("⚠  Timeout: no barcode scanned within "
+                             f"{self.SCAN_TIMEOUT_SEC}s.")
+            return None
+        except Exception as e:
+            self.failed.emit(f"Scanner error: {e}")
+            return None
+
+    # ─────────────────────────────────────────────────────────────────────
+    def _do_processing(self, barcode):
+        """خطوة الـ Processing — يبعت الباركود للفيجن ويستنى الرد."""
+        if self.demo_mode or self.app is None:
+            self.status_changed.emit(f"⏳  [DEMO] Processing barcode {barcode}…")
+            time.sleep(self.DEMO_DELAY)
+            return None
+
+        self.status_changed.emit(f"⏳  Sending barcode {barcode} to vision…")
+        client = self.app.VisionClient_TRIG
+
+        # نتأكد إن الفيجن متصل قبل ما نبعت — عشان منعلقش الثريد
+        if not getattr(client, "connected", False):
+            # نحاول مرة سريعة — لو فشل نخلص بدون ما نقفل البرنامج
+            try:
+                client.connect()
+            except Exception:
+                pass
+            if not getattr(client, "connected", False):
+                self.status_changed.emit(
+                    "⚠  Vision client not connected — proceeding without it."
+                )
+                return None
+
+        try:
+            response = client.send_request(barcode)
+            return response
+        except Exception as e:
+            self.status_changed.emit(f"⚠  Vision request failed: {e}")
+            return None
+
+    # ─────────────────────────────────────────────────────────────────────
+    def _interpret_result(self, response, barcode):
+        """تحويل رد الفيجن (bytes / None) لـ PASS / FAIL."""
+        # وضع الـ Demo: نتيجة بناءً على آخر رقم في الباركود
+        if self.demo_mode or response is None:
+            try:
+                last_char = str(barcode).strip()[-1]
+                return "PASS" if last_char.isdigit() and int(last_char) % 2 == 0 else "FAIL"
+            except Exception:
+                return "FAIL"
+
+        # Production: نفسر رد السيرفر
+        try:
+            if isinstance(response, (bytes, bytearray)):
+                text = response.decode("utf-8", errors="ignore").strip().upper()
+            else:
+                text = str(response).strip().upper()
+        except Exception:
+            text = ""
+
+        if "PASS" in text or text in ("OK", "1", "TRUE"):
+            return "PASS"
+        return "FAIL"
+
+    # ─────────────────────────────────────────────────────────────────────
+    def _do_save(self, barcode, result):
+        """خطوة الحفظ — يستخدم excel_backend.result_reporting لو متاح."""
+        image_path = ""
+        if self.demo_mode or not BACKEND_AVAILABLE:
+            # رجوع لمنطق الحفظ القديم (محلي على الـ Desktop)
+            try:
+                _save_locally(barcode, self.model_name, result)
+            except Exception as e:
+                self.status_changed.emit(f"⚠  Local save failed: {e}")
+            return image_path
+
+        try:
+            excel_backend.result_reporting(
+                ID=barcode,
+                description=self.model_name,
+                result=result,
+                file_path=EXCEL_PATH,
+            )
+        except Exception as e:
+            # لو فشل، نجرب الـ fallback المحلي
+            self.status_changed.emit(f"⚠  Excel backend failed ({e}) — saving locally.")
+            try:
+                _save_locally(barcode, self.model_name, result)
+            except Exception as e2:
+                self.status_changed.emit(f"⚠  Local save also failed: {e2}")
+        return image_path
+
+
+def _save_locally(barcode, model, result):
+    """حفظ بسيط على الـ Desktop — fallback لو الـ excel backend وقع."""
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    if os.path.exists(EXCEL_PATH):
+        wb = openpyxl.load_workbook(EXCEL_PATH)
+        ws = wb.active
+    else:
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Leak Test Results"
+        ws.append(["Timestamp", "Barcode", "Model", "Result"])
+    ws.append([now, barcode, model, result])
+    os.makedirs(os.path.dirname(EXCEL_PATH), exist_ok=True)
+    wb.save(EXCEL_PATH)
+
+
 # ─── MAIN WINDOW ──────────────────────────────────────────────────────────────
 class FreshLeakTestApp(QMainWindow):
     def __init__(self):
@@ -188,8 +380,10 @@ class FreshLeakTestApp(QMainWindow):
         self.current_step = -1
         self.test_result = "—"
         self.last_image_path = ""
-        self._timer = QTimer()
-        self._timer.timeout.connect(self._advance_step)
+
+        # ── Back-end state ────────────────────────────────────────────
+        self.app = None        # ClientsClass.App() instance — يتعمل lazy
+        self.worker = None     # LeakTestWorker — بيتعاد استخدامه كل run
 
         self.setWindowTitle("Fresh — Leak Test Monitor")
         self.setMinimumSize(780, 600)
@@ -441,58 +635,85 @@ class FreshLeakTestApp(QMainWindow):
         self.step_indicator.apply_theme(T)
         self.result_badge.set_result(self.test_result, T)
 
-    # ── TEST LOGIC ────────────────────────────────────────────────────────────
+    # ── TEST LOGIC (موصول بالباك اند الحقيقي) ────────────────────────────────
     def _run_test(self):
+        """يبدأ تشغيل اختبار جديد عن طريق LeakTestWorker (QThread)."""
         if self.model_combo.currentIndex() == 0:
             self.status_lbl.setText("⚠  Please select a model first.")
             return
 
+        # لو في worker شغال لسه ما نسمحش بتشغيل تاني
+        if self.worker is not None and self.worker.isRunning():
+            self.status_lbl.setText("⚠  Test already running…")
+            return
+
+        # Lazy-init للـ back-end App مرة واحدة بس
+        if BACKEND_AVAILABLE and self.app is None:
+            try:
+                self.app = clients_backend.App()
+            except Exception as e:
+                self.status_lbl.setText(f"⚠  Could not init backend: {e} — DEMO mode.")
+                self.app = None
+
+        # Reset الـ UI
         self.run_btn.setEnabled(False)
         self.current_step = 0
         self.test_result = "—"
         self.result_badge.set_result("—", self.theme)
         self.step_indicator.set_step(0)
-        self.status_lbl.setText("⏳  Test running — Scanning...")
-        self._timer.start(1200)  # simulate step every 1.2s
+        self.status_lbl.setText("⏳  Test running…")
 
-    def _advance_step(self):
-        self.current_step += 1
-        step_names = ["Scanning...", "Processing data...", "Evaluating result...", "Saving to Excel..."]
+        # نشغل الـ worker
+        demo_mode = (not BACKEND_AVAILABLE) or (self.app is None)
+        self.worker = LeakTestWorker(
+            app=self.app,
+            model_name=self.model_combo.currentText(),
+            demo_mode=demo_mode,
+        )
+        self.worker.step_changed.connect(self._on_worker_step)
+        self.worker.status_changed.connect(self.status_lbl.setText)
+        self.worker.finished_ok.connect(self._on_worker_finished)
+        self.worker.failed.connect(self._on_worker_failed)
+        self.worker.start()
 
-        if self.current_step < len(PROCESSES):
-            self.step_indicator.set_step(self.current_step)
-            self.status_lbl.setText(f"⏳  {step_names[self.current_step]}")
-        else:
-            self._timer.stop()
-            self.step_indicator.set_step(99)
-            # Simulate result (demo: PASS if even model index, FAIL if odd)
-            idx = self.model_combo.currentIndex()
-            result = "PASS" if idx % 2 == 0 else "FAIL"
-            self.test_result = result
-            self.result_badge.set_result(result, self.theme)
-            self._save_to_excel(result)
-            self.run_btn.setEnabled(True)
-            icon = "✅" if result == "PASS" else "❌"
-            self.status_lbl.setText(f"{icon}  Test complete — {result}. Results saved.")
+    def _on_worker_step(self, idx):
+        """يتحدث الـ step indicator حسب الخطوة الحالية."""
+        self.current_step = idx
+        self.step_indicator.set_step(idx)
 
-    def _save_to_excel(self, result):
-        model = self.model_combo.currentText()
-        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        image_path = self.last_image_path or "N/A"
+    def _on_worker_finished(self, result, barcode, image_path):
+        """يتنادى لما الـ worker يخلص بنجاح."""
+        self.test_result = result
+        self.last_image_path = image_path or ""
+        self.step_indicator.set_step(99)  # الكل خلص
+        self.result_badge.set_result(result, self.theme)
+        icon = "✅" if result == "PASS" else "❌"
+        suffix = f" (Barcode: {barcode})" if barcode else ""
+        self.status_lbl.setText(f"{icon}  Test complete — {result}.{suffix}")
+        self.run_btn.setEnabled(True)
 
-        # Create or load workbook
-        if os.path.exists(EXCEL_PATH):
-            wb = openpyxl.load_workbook(EXCEL_PATH)
-            ws = wb.active
-        else:
-            wb = openpyxl.Workbook()
-            ws = wb.active
-            ws.title = "Leak Test Results"
-            ws.append(["Timestamp", "Model", "Result", "Image Path"])
+    def _on_worker_failed(self, msg):
+        """يتنادى لو حصل خطأ في أي خطوة."""
+        self.test_result = "—"
+        self.result_badge.set_result("—", self.theme)
+        self.status_lbl.setText(msg)
+        self.run_btn.setEnabled(True)
 
-        ws.append([now, model, result, image_path])
-        os.makedirs(os.path.dirname(EXCEL_PATH), exist_ok=True)
-        wb.save(EXCEL_PATH)
+    # ── CLEANUP ───────────────────────────────────────────────────────────────
+    def closeEvent(self, event):
+        """ينضف الباك اند والـ worker قبل ما البرنامج يقفل."""
+        try:
+            if self.worker is not None and self.worker.isRunning():
+                self.worker.requestInterruption()
+                self.worker.wait(2000)  # ننتظر ثانيتين كحد أقصى
+        except Exception:
+            pass
+        try:
+            if BACKEND_AVAILABLE:
+                scanner_backend.stop_listener()
+        except Exception:
+            pass
+        super().closeEvent(event)
 
     def _open_excel(self):
         if not os.path.exists(EXCEL_PATH):
@@ -508,11 +729,98 @@ class FreshLeakTestApp(QMainWindow):
         except Exception as e:
             self.status_lbl.setText(f"Could not open file: {e}")
 
+class SimpleSplashWindow(QWidget):
+    def __init__(self, logo_path, theme):
+        super().__init__()
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setFixedSize(500, 350)
+        
+        # توسيط الشاشة
+        qr = self.frameGeometry()
+        cp = QApplication.desktop().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
+
+        layout = QVBoxLayout(self)
+        layout.setAlignment(Qt.AlignCenter)
+        layout.setSpacing(20)
+
+        # 1. اللوجو
+        self.logo_lbl = QLabel()
+        pixmap = QPixmap(logo_path)
+        if not pixmap.isNull():
+            self.logo_lbl.setPixmap(pixmap.scaledToWidth(220, Qt.SmoothTransformation))
+        self.logo_lbl.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.logo_lbl)
+
+        # 2. نص التحميل
+        self.msg_lbl = QLabel("Starting System...")
+        self.msg_lbl.setAlignment(Qt.AlignCenter)
+        self.msg_lbl.setFont(QFont("Segoe UI", 10))
+        self.msg_lbl.setStyleSheet(f"color: {theme['text']};")
+        layout.addWidget(self.msg_lbl)
+
+        # 3. شريط التحميل (الخط اللي رايح جاي)
+        self.progress = QProgressBar()
+        self.progress.setTextVisible(False)
+        self.progress.setFixedHeight(4) # خط رفيع جداً وشيك
+        
+        # السطر ده هو اللي بيخليه خط تحميل لا نهائي (رايح جاي)
+        self.progress.setRange(0, 0) 
+        
+        self.progress.setStyleSheet(f"""
+            QProgressBar {{
+                background-color: {theme['surface2']};
+                border: none;
+                border-radius: 2px;
+            }}
+            QProgressBar::chunk {{
+                background-color: #fb7706; /* لون برتقالي جذاب */
+                border-radius: 2px;
+            }}
+        """)
+        layout.addWidget(self.progress)
+
+    def update_message(self, message):
+        """دالة بنغير بيها النص بس، والخط شغال لوحده"""
+        self.msg_lbl.setText(message)
+        QApplication.processEvents()
 
 # ─── ENTRY POINT ──────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
+
+    # 1. تشغيل شاشة التحميل
+    logo_file = "company_logo.png" # تأكد إن مسار اللوجو صح
+    splash = SimpleSplashWindow(logo_file, DARK)
+    splash.show()
+
+    # --- السر هنا: دالة تأخير مش بتوقف الواجهة ---
+    def smooth_delay(seconds):
+        end_time = time.time() + seconds
+        while time.time() < end_time:
+            app.processEvents() # بيخلي الأنيميشن يفضل شغال
+            time.sleep(0.01)    # ملي ثانية عشان منستهلكش البروسيسور عالفاضي
+    # ---------------------------------------------
+
+    # 2. رسايل التحميل (رسالة ووقت)
+    load_steps = [
+        ("Connecting to Hardware...", 1.2),
+        ("Initializing PLC Variables...", 1.0),
+        ("Loading Vision Setup...", 1.5),
+        ("System Ready!", 0.5)
+    ]
+
+    for message, delay in load_steps:
+        splash.update_message(message)
+        # استخدمنا دالة التأخير الجديدة بدل time.sleep العادية
+        smooth_delay(delay)
+
+    # 3. تشغيل النافذة الرئيسية وقفل التحميل
     window = FreshLeakTestApp()
+    splash.close()
     window.show()
+
     sys.exit(app.exec_())

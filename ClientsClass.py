@@ -7,15 +7,12 @@ import os
 import textwrap
 from datetime import datetime
 import csv
+import pandas as pd
+from openpyxl import load_workbook
+from openpyxl.styles import Font
+import scanner as sc
 
 
-def barcode_processing_loop(barcode_data):
-    # مثال بسيط لمعالجة الباركود (تقدر تعدلها حسب احتياجاتك)
-    # return model, descrition, trig number
-    pass
-
-def result_handling ():
-    pass
 
 class TCPServer:
     def __init__(self, ip="0.0.0.0", port=5000, timeout=None, buffer_size=4096):
@@ -143,11 +140,6 @@ class TCPServer:
             return self.receive_queue.get(block=block, timeout=timeout)
         except queue.Empty:
             return None
-
-
-
-
-
 
 
 
@@ -427,28 +419,49 @@ class  TCPClient():
 ##################################################################
 class App():
     def __init__(self):
-        
-        self.VisionClient = TCPClient("127.0.0.1", 8080)
-        self.VisionClient.start_reconnection_watchdog()
-        if self.VisionClient.connect():
-            self.VisionClient.start_listening()
-        else:
-            print("Failed to connect to Vision Server. Exiting.")
-            exit(1)
-    
+
+        self.vision_queue = queue.Queue()
+        self.report_queue = queue.Queue()
+
+        self.VisionClient_TRIG = TCPClient("127.0.0.1", 8080)
+        self.VisionClient_ID = TCPClient("127.0.0.1", 8080)
         self.cobotClient = TCPClient("192.168.57.2", 9000)
-        self.cobotClient.start_reconnection_watchdog()
+             
+
+
         
 
-    def scanner_callback(self, data):
-        print(f"Data received from Vision Server: {data}")
-        # هنا ممكن تضيف أي معالجة إضافية للبيانات قبل ما تبعتها للكوبوت
-        self.cobotClient.send_only(data)
+    def get_barcode_from_scanner(self):
+        # هنا بنستخدم الكيو اللي في scanner.py عشان نجيب الباركود اللي اتقرا
+        while True:
+            try:
+                if sc.flag_barcode: # لو العلم True يعني فيه باركود جاهز
+                    sc.flag_barcode = False # تصفير العلم
+                    barcode = sc.queue_barcode.get(timeout=10) # هينتظر لحد ما يجي باركود أو 10 ثواني
+                    self.vision_queue.put(barcode)
+                    self.report_queue.put(barcode) # لو حابب تشارك الباركود مع دوال تانية في App
+                    print(f"Barcode received and put in vision_queue: {barcode}")
+                    sc.queue_barcode.task_done() # تأكيد إننا خلصنا التعامل مع الباركود
+                else:
+                    time.sleep(0.1) # لو مفيش باركود جاهز، ننتظر شوية قبل ما نشيك تاني
+    
+            except queue.Empty:
+                print("No barcode received within the timeout period.")
 
+    def result_handling(self, data):
+        pass
+            
 
+    def sequance_handler(self, data):
+        
+        pass
 
     def run(self):
-        self.root.mainloop()
+        self.VisionClient_TRIG.start_reconnection_watchdog()
+        self.VisionClient_ID.start_reconnection_watchdog()
+        self.cobotClient.start_reconnection_watchdog()
+        self.cobotClient.start_listening(callback=self.sequance_handler)
+        threading.Thread(target=self.get_barcode_from_scanner, daemon=True).start()
 
 ################################################################"""
 
