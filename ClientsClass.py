@@ -452,8 +452,27 @@ class App():
         pass
             
 
-    def sequance_handler(self, data):
+    def sequance_handler(self):
         
+        while self.copotClient.connected:
+            if not self.vision_queue.empty():
+                try:
+                    barcode = self.vision_queue.get() 
+                    program = self.determine_program_from_barcode(barcode) # دالة بتحدد البرنامج المناسب للباركود
+                    serial_number = self.extract_serial_number(barcode) # دالة بتستخرج الرقم التسلسلي من الباركود
+                    if program == 1 :
+                        result = self.cobotClient.send_request(1)
+                        list_of_results =[]
+                        for i in range(3): # لو عايز تبعت 3 برامج مختلفة مثلاً
+                            x = 11
+                            self.VisionClient_ID.send_only(serial_number)
+                            test_result = self.VisionClient_TRIG.send_request(x)
+                            list_of_results.append(test_result)          
+                            x+=1          
+                    #بعد ما تخلص التعامل مع الداتا، ممكن تحطها في كيو تاني
+                except Exception as e:
+                    print(f"Error in sequence handler: {e}")
+                    break
         pass
 
     def run(self):
