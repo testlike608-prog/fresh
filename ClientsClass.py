@@ -4,14 +4,17 @@ import time
 import queue
 import pyodbc
 import os
+import re
 import textwrap
 from datetime import datetime
 import csv
 import pandas as pd
 from openpyxl import load_workbook
+import openpyxl
 from openpyxl.styles import Font
 import scanner as sc
-
+import excel as ex
+from thread_logger import LoggedThread, get_logger as _get_thread_logger
 
 
 class TCPServer:
@@ -33,10 +36,46 @@ class TCPServer:
         self._log = list()
         self.name = "TCP_SERVER"
 
-        # الكيوز (كما في الكود الخاص بك)
+        # الكيوز
         self.shared_queue = queue.Queue()
         self.receive_queue = queue.Queue()
+        
 
+
+    def start_listening(self, callback):
+        
+        self.callback = callback
+        self.listen_thread = LoggedThread(
+            target=self._process_queue_loop,
+            name=f"{self.name}-process-queue",
+            daemon=True,
+        )
+        self.listen_thread.start()
+        self._log_add("INFO", "Started background listening thread for callbacks.")
+
+    def _process_queue_loop(self):
+        """
+        اللوب الداخلي الذي يقرأ من الـ Queue وينفذ الـ Callback.
+        """
+        while self.running:
+            try:
+                # نسحب البيانات من الكيو، مع وضع timeout عشان اللوب ميستهلكش المعالج (CPU)
+                # السحب هيرجع لنا tuple فيها (عنوان الكلاينت، والبيانات)
+                item = self.receive_queue.get(timeout=1)
+                
+                # التأكد من صحة البيانات المسحوبة
+                if item and len(item) == 2:
+                    addr, data = item
+                    
+                    if self.callback:
+                        # تنفيذ دالة الكول باك وتمرير العنوان والبيانات لها
+                        self.callback()
+                        
+            except queue.Empty:
+                # لو الكيو فاضي وعدت ثانية، كمل اللوب عادي
+                continue
+            except Exception as e:
+                self._log_add("ERROR", f"Error in callback processing: {e}")
     def start(self):
         """بدء تشغيل السيرفر وحجز البورت"""
         try:
@@ -48,7 +87,11 @@ class TCPServer:
             self.running = True
             
             # تشغيل خيط لاستقبال الكلاينتس الجدد
-            self.accept_thread = threading.Thread(target=self._accept_loop, daemon=True)
+            self.accept_thread = LoggedThread(
+                target=self._accept_loop,
+                name=f"{self.name}-accept-loop",
+                daemon=True,
+            )
             self.accept_thread.start()
             
             self._log_add("INFO", f"Server started on {self.ip}:{self.port}")
@@ -65,10 +108,11 @@ class TCPServer:
                 self._log_add("INFO", f"New connection from {addr}")
                 
                 # تشغيل خيط خاص لكل كلاينت عشان السيرفر يخدم كذا حد في نفس الوقت
-                client_handler = threading.Thread(
-                    target=self._handle_client, 
-                    args=(client_sock, addr), 
-                    daemon=True
+                client_handler = LoggedThread(
+                    target=self._handle_client,
+                    args=(client_sock, addr),
+                    name=f"{self.name}-client-{addr[0]}:{addr[1]}",
+                    daemon=True,
                 )
                 client_handler.start()
                 self.clients.append(client_sock)
@@ -90,8 +134,14 @@ class TCPServer:
                 self._log_add("INFO", f"Received from {addr}: {data}")
                 self.receive_queue.put((addr, data)) # بنحط العنوان مع الداتا
                 
-                # مثال لرد تلقائي (Echo) لو حابب:
-                # client_sock.sendall(b"Message Received")
+                # --- التعديل هنا: استدعاء الـ Callback إذا كان موجوداً ---
+                if self.on_receive_callback:
+                    try:
+                        # نقوم بتمرير عنوان الكلاينت والبيانات المستلمة للدالة
+                        self.on_receive_callback(addr, data)
+                    except Exception as cb_err:
+                        self._log_add("ERROR", f"Callback execution error: {cb_err}")
+                # ---------------------------------------------------------
 
             except Exception as e:
                 self._log_add("WARNING", f"Client {addr} disconnected: {e}")
@@ -140,8 +190,6 @@ class TCPServer:
             return self.receive_queue.get(block=block, timeout=timeout)
         except queue.Empty:
             return None
-
-
 
 
 # General Class
@@ -199,7 +247,11 @@ class  TCPClient():
     
     def start_reconnection_watchdog(self):
         """تشغيل خيط المراقبة في الخلفية"""
-        thread = threading.Thread(target=self._connection_monitor, daemon=True)
+        thread = LoggedThread(
+            target=self._connection_monitor,
+            name=f"TCPClient-{self.ip}:{self.port}-reconnect-watchdog",
+            daemon=True,
+        )
         thread.start()
 
     def _connection_monitor(self):
@@ -334,7 +386,12 @@ class  TCPClient():
         :param callback: دالة اختيارية يتم استدعاؤها فور استلام بيانات
         """
         self.receive_queue = queue.Queue() # كيو لاستقبال البيانات
-        self.listen_thread = threading.Thread(target=self._listen_loop, args=(callback,), daemon=True)
+        self.listen_thread = LoggedThread(
+            target=self._listen_loop,
+            args=(callback,),
+            name=f"TCPClient-{self.ip}:{self.port}-listen-loop",
+            daemon=True,
+        )
         self.listen_thread.start()
         self._log_add("INFO", f"[{self.ip}] : [{self.port}] Started listening for incoming data...")
         
@@ -423,12 +480,12 @@ class App():
         self.vision_queue = queue.Queue()
         self.report_queue = queue.Queue()
 
-        self.VisionClient_TRIG = TCPClient("127.0.0.1", 8080)
+        self.VisionClient_TRIG = TCPClient("127.0.0.1", 8081)
         self.VisionClient_ID = TCPClient("127.0.0.1", 8080)
         self.cobotClient = TCPClient("192.168.57.2", 9000)
              
-
-
+        self.triggerserver = TCPServer(ip="0.0.0.0", port=5000)
+        self.triggerserver.start() # تشغيل السيرفر فوراً في الكونستركتور
         
 
     def get_barcode_from_scanner(self):
@@ -448,28 +505,157 @@ class App():
             except queue.Empty:
                 print("No barcode received within the timeout period.")
 
-    def result_handling(self, data):
-        pass
-            
+    def extract_serial_number(self, barcode):
+        """
+        تستخرج هذه الدالة الجزء الخاص بالسيريال (0000001) من النص الكامل للباركود.
+        مثال للنص: '2605TL0000001BISI'
+        """
+        # الطريقة الأولى: باستخدام Regex للبحث عن الأرقام المحصورة بين الحروف
+        match = re.search(r'[A-Z]+(\d+)[A-Z]+', barcode)
+        if match:
+            serial_part = match.group(1)
+            return serial_part
+        # الطريقة الثانية: إذا كان طول الكود ثابتاً دائماً في ماكينات Beko， يمكنك استخدام الـ Slicing مباشرة
+        # return barcode_text[6:13]
+        return None
 
+
+    def determine_program_from_barcode(self, barcode, excel_file_path="program_mapping.xlsx"):
+    
+        """
+        دالة لاستخراج الحرف الثالث من آخر الباركود والبحث عنه في الإكسل.
+        """
+        # 1. استخراج الحرف الثالث من الآخر
+        # إذا كان النص "2605TL0000001BISI"، فإن barcode_text[-3] سيجلب حرف "I"
+        # (إذا كنت تقصد حرف S، استخدم [-2])
+        target_char = barcode[-3]
+        try:
+            # 2. فتح ملف الإكسل
+            workbook = openpyxl.load_workbook(excel_file_path)
+            
+            # اختيار الشيت النشط (أو يمكنك كتابة اسم الشيت: workbook['Sheet1'])
+            sheet = workbook.active 
+            
+            # 3. البحث داخل الصفوف
+            # نفترض أن الحرف موجود في العمود الأول (A) والقيمة المطلوبة في العمود الثاني (B)
+            # min_row=2 لتجاهل الصف الأول إذا كان يحتوي على عناوين (Headers)
+            for row in sheet.iter_rows(min_row=2, values_only=True):
+                excel_char = row[0]  # القيمة في العمود الأول A
+                excel_value = row[1] # القيمة في العمود الثاني B
+                
+                # التأكد من تطابق الحرف
+                if excel_char == target_char:
+                    return excel_value # إرجاع القيمة اللي قدامه
+                    
+            # في حالة انتهاء البحث ولم يتم إيجاد الحرف
+            return "الحرف غير موجود في ملف الإكسل."
+
+        except FileNotFoundError:
+            return "خطأ: ملف الإكسل غير موجود في المسار المحدد."
+        except Exception as e:
+            return f"حدث خطأ غير متوقع: {e}"
+     
     def sequance_handler(self):
         
-        while self.copotClient.connected:
+        while self.cobotClient.connected:
             if not self.vision_queue.empty():
                 try:
                     barcode = self.vision_queue.get() 
                     program = self.determine_program_from_barcode(barcode) # دالة بتحدد البرنامج المناسب للباركود
                     serial_number = self.extract_serial_number(barcode) # دالة بتستخرج الرقم التسلسلي من الباركود
+                    self.vision_queue.task_done() # تأكيد إننا خلصنا التعامل مع الباركود في الـ Queue
                     if program == 1 :
                         result = self.cobotClient.send_request(1)
                         list_of_results =[]
                         for i in range(3): # لو عايز تبعت 3 برامج مختلفة مثلاً
                             x = 11
-                            self.VisionClient_ID.send_only(serial_number)
+                            y = 21
+                            self.VisionClient_ID.send_only(f"{barcode}_{i}")
                             test_result = self.VisionClient_TRIG.send_request(x)
-                            list_of_results.append(test_result)          
-                            x+=1          
-                    #بعد ما تخلص التعامل مع الداتا، ممكن تحطها في كيو تاني
+                            list_of_results.append(test_result)    
+                            result = self.cobotClient.send_request(y) # ممكن تبعت إشارة للسيرفر إنه يجهز البرنامج التالي أو يعمل حاجة تانية بين الاختبارات   
+                            x+=1 
+                            y+=1
+                        if 0 in list_of_results:
+                            final_result = "fail"
+                        else:
+                            final_result = "pass"
+                        ex.result_reporting(ID=barcode, serial_num=serial_number, result=final_result)
+                    if program == 2 :
+                        result = self.cobotClient.send_request(2)
+                        list_of_results =[]
+                        for i in range(3): # لو عايز تبعت 3 برامج مختلفة مثلاً
+                            x = 11
+                            y = 21
+                            self.VisionClient_ID.send_only(f"{barcode}_{i}")
+                            test_result = self.VisionClient_TRIG.send_request(x)
+                            list_of_results.append(test_result)    
+                            result = self.cobotClient.send_request(y) # ممكن تبعت إشارة للسيرفر إنه يجهز البرنامج التالي أو يعمل حاجة تانية بين الاختبارات   
+                            x+=1 
+                            y+=1
+                        if 0 in list_of_results:
+                            final_result = "fail"
+                        else:
+                            final_result = "pass"
+                        ex.result_reporting(ID=barcode, serial_num=serial_number, result=final_result)
+                    if program == 3:
+                        result = self.cobotClient.send_request(3)
+                        list_of_results =[]
+                        for i in range(3): # لو عايز تبعت 3 برامج مختلفة مثلاً
+                            x = 11
+                            y = 21
+                            self.VisionClient_ID.send_only(f"{barcode}_{i}")
+                            test_result = self.VisionClient_TRIG.send_request(x)
+                            list_of_results.append(test_result)    
+                            result = self.cobotClient.send_request(y) # ممكن تبعت إشارة للسيرفر إنه يجهز البرنامج التالي أو يعمل حاجة تانية بين الاختبارات   
+                            x+=1 
+                            y+=1
+                        if 0 in list_of_results:
+                            final_result = "fail"
+                            self.cobotClient.send_only(0)
+                        else:
+                            final_result = "pass"
+                            self.cobotClient.send_only(1)
+                        ex.result_reporting(ID=barcode, serial_num=serial_number, result=final_result)
+                    if program == 4 :
+                        result = self.cobotClient.send_request(4)
+                        list_of_results =[]
+                        for i in range(3): # لو عايز تبعت 3 برامج مختلفة مثلاً
+                            x = 11
+                            y = 21
+                            self.VisionClient_ID.send_only(f"{barcode}_{i}")
+                            test_result = self.VisionClient_TRIG.send_request(x)
+                            list_of_results.append(test_result)    
+                            result = self.cobotClient.send_request(y) # ممكن تبعت إشارة للسيرفر إنه يجهز البرنامج التالي أو يعمل حاجة تانية بين الاختبارات   
+                            x+=1 
+                            y+=1
+                        if 0 in list_of_results:
+                            final_result = "fail"
+                            self.cobotClient.send_only(0)
+                        else:
+                            final_result = "pass"
+                            self.cobotClient.send_only(1)
+                        ex.result_reporting(ID=barcode, serial_num=serial_number, result=final_result)
+                           
+                    if program == 5 :
+                        result = self.cobotClient.send_request(5)
+                        list_of_results =[]
+                        for i in range(3): # لو عايز تبعت 3 برامج مختلفة مثلاً
+                            x = 11
+                            y = 21
+                            self.VisionClient_ID.send_only(f"{barcode}_{i}")
+                            test_result = self.VisionClient_TRIG.send_request(x)
+                            list_of_results.append(test_result)    
+                            result = self.cobotClient.send_request(y) # ممكن تبعت إشارة للسيرفر إنه يجهز البرنامج التالي أو يعمل حاجة تانية بين الاختبارات   
+                            x+=1 
+                            y+=1
+                        if 0 in list_of_results:
+                            final_result = "fail"
+                            self.cobotClient.send_only(0)
+                        else:
+                            final_result = "pass"
+                            self.cobotClient.send_only(1)
+                        ex.result_reporting(ID=barcode, serial_num=serial_number, result=final_result)  # تخلص التعامل مع الداتا، ممكن تحطها في كيو تاني
                 except Exception as e:
                     print(f"Error in sequence handler: {e}")
                     break
@@ -479,8 +665,13 @@ class App():
         self.VisionClient_TRIG.start_reconnection_watchdog()
         self.VisionClient_ID.start_reconnection_watchdog()
         self.cobotClient.start_reconnection_watchdog()
-        self.cobotClient.start_listening(callback=self.sequance_handler)
-        threading.Thread(target=self.get_barcode_from_scanner, daemon=True).start()
+        self.triggerserver.start_listening(self.sequance_handler) # تعيين الـ Callback
+
+        LoggedThread(
+            target=self.get_barcode_from_scanner,
+            name="App-barcode-from-scanner",
+            daemon=True,
+        ).start()
 
 ################################################################"""
 

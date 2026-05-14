@@ -37,7 +37,7 @@ my_photo = "profile.jpeg"
 full_link = get_image_path(my_photo)
 print(full_link)
 """
-def result_reporting(ID, description, serial_num, result, file_path="results_report.xlsx"):
+def result_reporting(ID, serial_num, result, file_path="results_report.xlsx"):
     image_path = []
     for i in range(0, 4):  # لو حابب تضيف لحد 4 صور
         image_path.append(get_image_path(f"{ID}_{i}.png"))
@@ -45,7 +45,6 @@ def result_reporting(ID, description, serial_num, result, file_path="results_rep
 
     new_data = {
         'id': [ID],
-        'description': [description],
         'serial': [serial_num],
         'image path1': [image_path[0]],
         'image path2': [image_path[1]],  # لو حابب تضيف صورة تانية
