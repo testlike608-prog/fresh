@@ -15,6 +15,25 @@ from openpyxl.styles import Font
 import scanner as sc
 import excel as ex
 from thread_logger import LoggedThread, get_logger as _get_thread_logger
+import pandas as pd
+
+
+def _to_bytes(message, is_hex=False):
+    """
+    تحويل أي قيمة لـ bytes جاهزه للإرسال على السوكيت.
+    بيتعامل مع: bytes, str, int, float (وأي رقم).
+    لو is_hex=True بيفسر الـ str كـ hex.
+
+    قبل التعديل: send_only(1) كان بيرمي 'int' object has no attribute 'encode'.
+    """
+    if isinstance(message, bytes):
+        return message
+    if isinstance(message, bytearray):
+        return bytes(message)
+    if is_hex and isinstance(message, str):
+        return bytes.fromhex(message)
+    # نحوّل أي رقم لـ str قبل encode
+    return str(message).encode('utf-8')
 
 
 class TCPServer:
@@ -43,39 +62,15 @@ class TCPServer:
 
 
     def start_listening(self, callback):
-        
+        """
+        كل اللي بنعمله هنا إننا بنسجل الفانكشن اللي هتشتغل 
+        أول ما أي داتا توصل.
+        """
         self.callback = callback
-        self.listen_thread = LoggedThread(
-            target=self._process_queue_loop,
-            name=f"{self.name}-process-queue",
-            daemon=True,
-        )
-        self.listen_thread.start()
-        self._log_add("INFO", "Started background listening thread for callbacks.")
+        self._log_add("INFO", "Callback registered. Waiting for incoming data...")
 
-    def _process_queue_loop(self):
-        """
-        اللوب الداخلي الذي يقرأ من الـ Queue وينفذ الـ Callback.
-        """
-        while self.running:
-            try:
-                # نسحب البيانات من الكيو، مع وضع timeout عشان اللوب ميستهلكش المعالج (CPU)
-                # السحب هيرجع لنا tuple فيها (عنوان الكلاينت، والبيانات)
-                item = self.receive_queue.get(timeout=1)
-                
-                # التأكد من صحة البيانات المسحوبة
-                if item and len(item) == 2:
-                    addr, data = item
-                    
-                    if self.callback:
-                        # تنفيذ دالة الكول باك وتمرير العنوان والبيانات لها
-                        self.callback()
-                        
-            except queue.Empty:
-                # لو الكيو فاضي وعدت ثانية، كمل اللوب عادي
-                continue
-            except Exception as e:
-                self._log_add("ERROR", f"Error in callback processing: {e}")
+
+    
     def start(self):
         """بدء تشغيل السيرفر وحجز البورت"""
         try:
@@ -122,37 +117,44 @@ class TCPServer:
                     self._log_add("ERROR", f"Accept error: {e}")
                 break
 
+    
+    
     def _handle_client(self, client_sock, addr):
-        """الدالة اللي بتتعامل مع كل كلاينت لوحده (استقبال بيانات)"""
+        """
+        الدالة دي بتشتغل في Thread منفصل لكل كلاينت بيتصل، 
+        وبتفضل مستنية داتا منه.
+        """
         while self.running:
             try:
+                # السطر ده بيفضل عامل بلوك (واقف) لحد ما الكلاينت يبعت داتا
                 data = client_sock.recv(self.buffer_size)
+                
                 if not data:
-                    # لو الكلاينت قفل الاتصال
+                    # لو الداتا فاضية، معناه إن الكلاينت قفل الاتصال
                     break
                 
                 self._log_add("INFO", f"Received from {addr}: {data}")
-                self.receive_queue.put((addr, data)) # بنحط العنوان مع الداتا
                 
-                # --- التعديل هنا: استدعاء الـ Callback إذا كان موجوداً ---
-                if self.on_receive_callback:
+                # ============== السحر كله هنا ==============
+                # أول ما الداتا توصل، ننده الـ Callback فوراً
+                if hasattr(self, 'callback') and self.callback:
                     try:
-                        # نقوم بتمرير عنوان الكلاينت والبيانات المستلمة للدالة
-                        self.on_receive_callback(addr, data)
+                        # بنبعت الـ client_sock (عشان لو حبيت ترد عليه)، والـ addr، والـ data
+                        self.callback(client_sock, addr, data)
                     except Exception as cb_err:
-                        self._log_add("ERROR", f"Callback execution error: {cb_err}")
-                # ---------------------------------------------------------
+                        self._log_add("ERROR", f"Error inside callback: {cb_err}")
+                # ==========================================
 
             except Exception as e:
                 self._log_add("WARNING", f"Client {addr} disconnected: {e}")
                 break
         
-        # تنظيف بعد ما الكلاينت يخرج
+        # لما اللوب يخلص (الكلاينت يقفل)، ننظف السوكيت
         client_sock.close()
         if client_sock in self.clients:
             self.clients.remove(client_sock)
-        self._log_add("INFO", f"Connection closed for {addr}")
-
+        self._log_add("INFO", f"Connection closed for {addr}")  
+    
     def broadcast(self, message, is_hex=False):
         """إرسال رسالة لكل الكلاينتس المتصلين حالياً"""
         data_to_send = self._prepare_data(message, is_hex)
@@ -163,12 +165,7 @@ class TCPServer:
                 pass # هنا السوكيت غالباً ميت، الـ handle_client هينظفه
 
     def _prepare_data(self, message, is_hex):
-        if isinstance(message, bytes):
-            return message
-        elif is_hex:
-            return bytes.fromhex(message)
-        else:
-            return message.encode('utf-8')
+        return _to_bytes(message, is_hex)
 
     def stop(self):
         """إيقاف السيرفر تماماً"""
@@ -194,9 +191,10 @@ class TCPServer:
 
 # General Class
 class  TCPClient():
-    def __init__(self, ip, port, timeout=None, buffer_size=4096):
+    def __init__(self, ip, port, timeout=None, buffer_size=4096, name=None):
         """
         :param timeout: لو خليته None هيفضل مستني للأبد لحد ما السيرفر يرد
+        :param name: اسم اختياري للعميل يظهر في اللوج (مفيد لما يكون عندك أكتر من client)
         """
         self.ip = ip
         self.port = port
@@ -208,12 +206,21 @@ class  TCPClient():
         self._log_lock = threading.Lock()
         self._log_seq = 0
         self._log = list()
-        self.name =""
+        # اسم افتراضي معبّر بدل ما يطلع [][INFO] في اللوج
+        self.name = name if name else f"TCPClient-{ip}:{port}"
         self.current_program_label =""
         self.current_program_data=""
 
+        # ── علم لإيقاف monitors و listeners ──────────────────────────────
+        self._stop_monitor = threading.Event()
+        # قفل بيمنع التداخل بين send_request و watchdog ping
+        self._send_lock = threading.Lock()
+
+        # كيو الاستقبال (ينعمل من بدري عشان get_last_received مايرميش AttributeError)
+        self.receive_queue = queue.Queue()
+
         self.shared_queue = queue.Queue()
-        self.shared_queue2= queue.Queue() #FOR DUMMY shared between scanner and data proccesing function 
+        self.shared_queue2= queue.Queue() #FOR DUMMY shared between scanner and data proccesing function
         self.shared_queue3= queue.Queue() # for dummies shared between scanner and i/o writer function
 
     def connect(self):
@@ -227,6 +234,17 @@ class  TCPClient():
             self.sock.settimeout(self.timeout) # تحديد وقت الانتظار (أو None للانتظار الدائم)
             self.sock.connect((self.ip, self.port))
             self.connected = True
+            # ضعه داخل دالة connect() بعد السطر self.sock.connect(...)
+            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+
+            # لتعديل الوقت على ويندوز/لينكس ليصبح الفحص سريعاً (مثلاً كل 5 ثواني)
+            if hasattr(socket, "SIO_KEEPALIVE_VALS"): # Windows
+                # (تفعيل، الوقت بالمللي ثانية قبل بدء الفحص، الوقت بين الفحص والتالي)
+                self.sock.ioctl(socket.SIO_KEEPALIVE_VALS, (1, 5000, 3000))
+            elif hasattr(socket, "TCP_KEEPIDLE"): # Linux
+                self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 5)
+                self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 3)
+                self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 3)
             print(f"[{self.ip}] : [{self.port}] Connected successfully.")
             return True
         except Exception as e:
@@ -235,15 +253,17 @@ class  TCPClient():
             return False
             
     def ensure_connected(self):
-        """تتأكد إننا متصلين، ولو مش متصلين تحاول للأبد"""
-        while not self.connected:
+        """تتأكد إننا متصلين، تحاول لحد ما تتصل أو يتم إيقاف الـ monitor."""
+        while not self.connected and not self._stop_monitor.is_set():
             self._log_add("INFO", f"Trying to reconnect to {self.ip}...")
             if self.connect():
                 self._log_add("INFO", "✅ Reconnected successfully!")
                 break
             else:
                 self._log_add("WARNING", "❌ Retrying in 5 seconds...")
-                time.sleep(5)    
+                # نوم قابل للإيقاف فوراً عن طريق _stop_monitor.set()
+                if self._stop_monitor.wait(timeout=5):
+                    break
     
     def start_reconnection_watchdog(self):
         """تشغيل خيط المراقبة في الخلفية"""
@@ -255,22 +275,67 @@ class  TCPClient():
         thread.start()
 
     def _connection_monitor(self):
-        """الدالة اللي بتراقب الاتصال كل كام ثانية"""
-        while True:
+        """
+        watchdog حقيقي بيراقب الاتصال بدون ما يبعت داتا للسيرفر.
+
+        الطريقة:
+        - بنستخدم select.select لمعرفه لو السوكيت لسه شغال (writable).
+        - بنفحص لو فيه بيانات في الـ buffer جاهزة للقراءة (MSG_PEEK).
+        - لو السوكيت اتقفل من الناحيه التانيه، recv بترجع b'' فبنعرف الاتصال راح.
+        - مش بنبعت "ping" عشان مانلخبطش السيرفر الحقيقي بأوامر مش متوقعة.
+        """
+        import select
+        log = _get_thread_logger()
+        log.info(f"Connection watchdog started for {self.name}")
+
+        while not self._stop_monitor.is_set():
             if not self.connected:
                 # لو لقيناه فصل، نصلحه
                 self.ensure_connected()
             else:
-                # لو متصل، نتأكد إنه "فعلاً" لسه شغال
+                # فحص بدون إرسال داتا
                 try:
-                    # محاولة إرسال بايت فارغ للتأكد من الـ Socket
-                    # MSG_PEEK بتشوف الداتا من غير ما تسحبها، أو ابعت حرف تافه لو السيرفر بيسمح
-                    self.sock.send(b'', socket.MSG_OOB) 
-                except Exception:
-                    self._log_add("WARNING", "⚠️ Connection lost in background!")
+                    if self.sock is None:
+                        self.connected = False
+                        continue
+
+                    # 1. فحص لو السوكيت writable (مش مقفول)
+                    _, writable, errored = select.select([], [self.sock], [self.sock], 0.5)
+                    if errored:
+                        raise OSError("socket reported error via select")
+
+                    # 2. peek لو في داتا قادمه عشان نعرف لو السيرفر قفل
+                    self.sock.setblocking(False)
+                    try:
+                        peek = self.sock.recv(1, socket.MSG_PEEK)
+                        if peek == b'':
+                            # السيرفر قفل الاتصال
+                            raise ConnectionResetError("peer closed connection (peek returned empty)")
+                    except BlockingIOError:
+                        # مفيش داتا — ده الوضع الطبيعي = الاتصال شغال
+                        pass
+                    finally:
+                        try:
+                            self.sock.setblocking(True)
+                            self.sock.settimeout(self.timeout)
+                        except Exception:
+                            pass
+
+                except Exception as e:
+                    self._log_add("WARNING", f"Connection lost in background: {e}")
                     self.connected = False
-            
-            time.sleep(3) # افحص كل 3 ثواني
+                    if self.sock:
+                        try:
+                            self.sock.close()
+                        except Exception:
+                            pass
+                        self.sock = None
+
+            # فحص كل 3 ثواني، لكن قابل للإيقاف فوراً
+            if self._stop_monitor.wait(timeout=3):
+                break
+
+        log.info(f"Connection watchdog stopped for {self.name}")
     
     def _get_sock(self):
          
@@ -287,18 +352,10 @@ class  TCPClient():
            
 
         try:
-            # 1. تجهيز الرسالة
-            data_to_send = None
-            if isinstance(message, bytes):
-                data_to_send = message
-            elif is_hex:
-                data_to_send = bytes.fromhex(message)
-            else:
-                data_to_send = message.encode('utf-8')
-                #data_to_send = [chunk.encode('utf-8') for chunk in message]
+            # 1. تجهيز الرسالة (بيتعامل مع int/str/bytes/float عبر _to_bytes)
+            data_to_send = _to_bytes(message, is_hex)
 
             # 2. الإرسال
-           
             self.sock.sendall(data_to_send)
 
             # 3. الاستقبال (هنا هيفضل مستني لحد ما السيرفر يرد)
@@ -363,14 +420,18 @@ class  TCPClient():
     def disconnect(self):
         """إغلاق الاتصال وإيقاف المونيتور"""
         self._stop_monitor.set() # وقف اللوب في المونيتور
+        self.connected = False
         if self.sock:
             try:
+                self.sock.shutdown(socket.SHUT_RDWR)
+            except Exception:
+                pass
+            try:
                 self.sock.close()
-            except:
+            except Exception:
                 pass
         self.sock = None
-        self.connected = False
-        print(f"[{self.ip}] Connection Closed.")
+        self._log_add("INFO", f"[{self.ip}] Connection Closed.")
 
     def _log_add(self, level: str, msg: str):
         with self._log_lock:
@@ -385,7 +446,8 @@ class  TCPClient():
         دالة لبدء عملية الاستماع في Thread منفصل
         :param callback: دالة اختيارية يتم استدعاؤها فور استلام بيانات
         """
-        self.receive_queue = queue.Queue() # كيو لاستقبال البيانات
+        # ملحوظه: receive_queue معرفه من الـ __init__ مرة واحدة بس،
+        # عشان get_last_received يقدر يتنادى قبل أو بعد start_listening.
         self.listen_thread = LoggedThread(
             target=self._listen_loop,
             args=(callback,),
@@ -443,14 +505,8 @@ class  TCPClient():
                     return False
 
             try:
-                # 1. تجهيز الرسالة بنفس المنطق اللي استخدمته في send_request
-                data_to_send = None
-                if isinstance(message, bytes):
-                    data_to_send = message
-                elif is_hex:
-                    data_to_send = bytes.fromhex(message)
-                else:
-                    data_to_send = message.encode('utf-8')
+                # 1. تجهيز الرسالة (بيتعامل مع int/str/bytes/float)
+                data_to_send = _to_bytes(message, is_hex)
 
                 # 2. الإرسال (sendall تضمن وصول البيانات بالكامل للـ Buffer)
                 self.sock.sendall(data_to_send)
@@ -479,31 +535,38 @@ class App():
 
         self.vision_queue = queue.Queue()
         self.report_queue = queue.Queue()
+        # علم لإيقاف العامل (sequance worker) عند الخروج
+        self._stop_app = threading.Event()
 
-        self.VisionClient_TRIG = TCPClient("127.0.0.1", 8081)
-        self.VisionClient_ID = TCPClient("127.0.0.1", 8080)
-        self.cobotClient = TCPClient("192.168.57.2", 9000)
-             
+        self.VisionClient_TRIG = TCPClient("127.0.0.1", 8081, name="VisionClient_TRIG")
+        self.VisionClient_ID = TCPClient("127.0.0.1", 8080, name="VisionClient_ID")
+        self.cobotClient = TCPClient("192.168.57.2", 9000, name="cobotClient")
+
         self.triggerserver = TCPServer(ip="0.0.0.0", port=5000)
         self.triggerserver.start() # تشغيل السيرفر فوراً في الكونستركتور
         
 
     def get_barcode_from_scanner(self):
-        # هنا بنستخدم الكيو اللي في scanner.py عشان نجيب الباركود اللي اتقرا
-        while True:
+        """
+        ياخد الباركود من scanner.queue_barcode (اللي بيتعمل put فيه من thread الـ keyboard hook)
+        ويحطه في vision_queue + report_queue.
+
+        ملحوظة: شيلنا الـ flag و race condition عليه — الكيو نفسه thread-safe.
+        """
+        log = _get_thread_logger()
+        while not self._stop_app.is_set():
             try:
-                if sc.flag_barcode: # لو العلم True يعني فيه باركود جاهز
-                    sc.flag_barcode = False # تصفير العلم
-                    barcode = sc.queue_barcode.get(timeout=10) # هينتظر لحد ما يجي باركود أو 10 ثواني
-                    self.vision_queue.put(barcode)
-                    self.report_queue.put(barcode) # لو حابب تشارك الباركود مع دوال تانية في App
-                    print(f"Barcode received and put in vision_queue: {barcode}")
-                    sc.queue_barcode.task_done() # تأكيد إننا خلصنا التعامل مع الباركود
-                else:
-                    time.sleep(0.1) # لو مفيش باركود جاهز، ننتظر شوية قبل ما نشيك تاني
-    
+                # هينتظر لحد ما يجي باركود أو نص ثانية (عشان نقدر نتحقق من _stop_app)
+                barcode = sc.queue_barcode.get(timeout=0.5)
             except queue.Empty:
-                print("No barcode received within the timeout period.")
+                continue
+
+            try:
+                self.vision_queue.put(barcode)
+                self.report_queue.put(barcode)
+                log.info(f"Barcode received and put in vision_queue: {barcode}")
+            finally:
+                sc.queue_barcode.task_done()
 
     def extract_serial_number(self, barcode):
         """
@@ -511,6 +574,7 @@ class App():
         مثال للنص: '2605TL0000001BISI'
         """
         # الطريقة الأولى: باستخدام Regex للبحث عن الأرقام المحصورة بين الحروف
+        self.cobotClient._log_add("INFO", f"Extracting serial number from barcode: {barcode}")
         match = re.search(r'[A-Z]+(\d+)[A-Z]+', barcode)
         if match:
             serial_part = match.group(1)
@@ -521,151 +585,127 @@ class App():
 
 
     def determine_program_from_barcode(self, barcode, excel_file_path="program_mapping.xlsx"):
-    
-        """
-        دالة لاستخراج الحرف الثالث من آخر الباركود والبحث عنه في الإكسل.
-        """
-        # 1. استخراج الحرف الثالث من الآخر
-        # إذا كان النص "2605TL0000001BISI"، فإن barcode_text[-3] سيجلب حرف "I"
-        # (إذا كنت تقصد حرف S، استخدم [-2])
+        self.cobotClient._log_add("INFO", f"Determining program for barcode: {barcode}")
         target_char = barcode[-3]
+        self.cobotClient._log_add("INFO", f"Target character for barcode {barcode}: {target_char}")
+
         try:
-            # 2. فتح ملف الإكسل
-            workbook = openpyxl.load_workbook(excel_file_path)
+            # 1. قراءة ملف الإكسل بالكامل في ثانية واحدة
+            # نفترض أن العمود الأول اسمه 'Character' والعمود الثاني اسمه 'Program'
+            # لو ما عندكش أسماء أعمدة (Headers)، قولي عشان نعدلها برقم العمود
+            df = pd.read_excel(excel_file_path)
             
-            # اختيار الشيت النشط (أو يمكنك كتابة اسم الشيت: workbook['Sheet1'])
-            sheet = workbook.active 
-            
-            # 3. البحث داخل الصفوف
-            # نفترض أن الحرف موجود في العمود الأول (A) والقيمة المطلوبة في العمود الثاني (B)
-            # min_row=2 لتجاهل الصف الأول إذا كان يحتوي على عناوين (Headers)
-            for row in sheet.iter_rows(min_row=2, values_only=True):
-                excel_char = row[0]  # القيمة في العمود الأول A
-                excel_value = row[1] # القيمة في العمود الثاني B
-                
-                # التأكد من تطابق الحرف
-                if excel_char == target_char:
-                    return excel_value # إرجاع القيمة اللي قدامه
-                    
-            # في حالة انتهاء البحث ولم يتم إيجاد الحرف
-            return "الحرف غير موجود في ملف الإكسل."
+            # تأكد من أسماء الأعمدة في ملفك، هنا فرضنا أن العمود الأول هو index 0 والثاني index 1
+            char_column = df.columns[0]
+            value_column = df.columns[1]
+
+            # 2. البحث المباشر بدون loops
+            match = df[df[char_column] == target_char]
+
+            if not match.empty:
+                # جلب القيمة المقابلة للحرف
+                excel_value = match[value_column].values[0]
+                self.cobotClient._log_add("INFO", f" got the value: {excel_value}")
+                return excel_value
+            else:
+                self.cobotClient._log_add("INFO", f"Character {target_char} not found in Excel file.")
+                return "الحرف غير موجود في ملف الإكسل."
 
         except FileNotFoundError:
+            self.cobotClient._log_add("INFO", f"Excel file not found at path: {excel_file_path}")
             return "خطأ: ملف الإكسل غير موجود في المسار المحدد."
         except Exception as e:
+            self.cobotClient._log_add("INFO", f"Unexpected error occurred with pandas: {e}")
             return f"حدث خطأ غير متوقع: {e}"
-     
-    def sequance_handler(self):
-        
-        while self.cobotClient.connected:
-            if not self.vision_queue.empty():
+
+    # ─── Callback خفيف جداً يخرج فوراً ─────────────────────────────────────
+    def sequance_handler(self, client_sock, addr, data):
+        """
+        callback بسيط جداً بيتنادى من TCPServer كل ما تيجي داتا.
+        لازم يخلص بسرعة عشان مايلوكش thread الكلاينت.
+        """
+        try:
+            self.cobotClient._log_add(
+                "INFO",
+                f"Trigger received from {addr}: {data!r} (len={len(data) if data else 0})"
+            )
+            # نخزن الـ trigger في receive_queue للسيرفر — العامل التاني هو اللي يقرأ
+            self.triggerserver.receive_queue.put({"addr": addr, "data": data, "ts": time.time()})
+        except Exception as e:
+            self.cobotClient._log_add("ERROR", f"sequance_handler callback failed: {e}")
+
+    # ─── العامل الحقيقي اللي بيشغل برامج الفحص ─────────────────────────
+    def _run_test_program(self, program, barcode):
+        """
+        ينفّذ تتابع فحص واحد (المنطق المشترك بين برامج 1-5).
+        - بيبعت رقم البرنامج للكوبوت
+        - بيلف 3 مرات: يبعت ID + يستنى نتيجه من الفيجن + يبلغ الكوبوت
+        - يحدد pass/fail بناءً على لو فيه 0 في النتائج
+        - يبعت إشارة نهائية للكوبوت (للبرامج 3-5 بس زي ما كان في الكود الأصلي)
+        :return: "pass" أو "fail"
+        """
+        program = int(program)
+        # برنامج 1 بيستخدم send_only بدل send_request زي ما كان في الكود الأصلي
+        if program :
+            self.cobotClient.send_request(program)
+            list_of_results = []
+            for i in range(3):
+                x = 11 + i
+                y = 21 + i
+                self.VisionClient_ID.send_only(f"{barcode}_{i}")
+                test_result = self.VisionClient_TRIG.send_request(x)
+                list_of_results.append(test_result)
+                # إشارة بين الاختبارات
+                self.cobotClient.send_request(y)
+
+            final_result = "fail" if 0 in list_of_results else "pass"
+        # برامج 3-5 بتبعت إشارة نهائية للكوبوت (نفس منطق الكود الأصلي)
+            self.cobotClient.send_only(0 if final_result == "fail" else 1)
+
+        return final_result
+
+    def _sequance_worker(self):
+        """
+        العامل الرئيسي: بيستلم باركودات من vision_queue وينفّذ تتابع الفحص.
+        ده اللي كان غلط متحط جوّا الـ callback — دلوقتي في thread منفصل.
+        """
+        log = _get_thread_logger()
+        log.info("Sequance worker started — waiting for barcodes in vision_queue...")
+
+        while not self._stop_app.is_set():
+            try:
+                # blocking get مع timeout عشان نقدر نخرج لما _stop_app يتفعّل
+                barcode = self.vision_queue.get(timeout=0.5)
+            except queue.Empty:
+                continue
+
+            try:
+                program = self.determine_program_from_barcode(barcode)
+                serial_number = self.extract_serial_number(barcode)
+
+                # لو determine رجع نص خطأ بدل رقم، نعرضه ونتجاهل الباركود
+                # نستخدم try/int بدل isinstance لأن pandas/numpy بترجع np.int64 مش int
                 try:
-                    barcode = self.vision_queue.get() 
-                    program = self.determine_program_from_barcode(barcode) # دالة بتحدد البرنامج المناسب للباركود
-                    serial_number = self.extract_serial_number(barcode) # دالة بتستخرج الرقم التسلسلي من الباركود
-                    self.vision_queue.task_done() # تأكيد إننا خلصنا التعامل مع الباركود في الـ Queue
-                    if program == 1 :
-                        result = self.cobotClient.send_request(1)
-                        list_of_results =[]
-                        for i in range(3): # لو عايز تبعت 3 برامج مختلفة مثلاً
-                            x = 11
-                            y = 21
-                            self.VisionClient_ID.send_only(f"{barcode}_{i}")
-                            test_result = self.VisionClient_TRIG.send_request(x)
-                            list_of_results.append(test_result)    
-                            result = self.cobotClient.send_request(y) # ممكن تبعت إشارة للسيرفر إنه يجهز البرنامج التالي أو يعمل حاجة تانية بين الاختبارات   
-                            x+=1 
-                            y+=1
-                        if 0 in list_of_results:
-                            final_result = "fail"
-                        else:
-                            final_result = "pass"
-                        ex.result_reporting(ID=barcode, serial_num=serial_number, result=final_result)
-                    if program == 2 :
-                        result = self.cobotClient.send_request(2)
-                        list_of_results =[]
-                        for i in range(3): # لو عايز تبعت 3 برامج مختلفة مثلاً
-                            x = 11
-                            y = 21
-                            self.VisionClient_ID.send_only(f"{barcode}_{i}")
-                            test_result = self.VisionClient_TRIG.send_request(x)
-                            list_of_results.append(test_result)    
-                            result = self.cobotClient.send_request(y) # ممكن تبعت إشارة للسيرفر إنه يجهز البرنامج التالي أو يعمل حاجة تانية بين الاختبارات   
-                            x+=1 
-                            y+=1
-                        if 0 in list_of_results:
-                            final_result = "fail"
-                        else:
-                            final_result = "pass"
-                        ex.result_reporting(ID=barcode, serial_num=serial_number, result=final_result)
-                    if program == 3:
-                        result = self.cobotClient.send_request(3)
-                        list_of_results =[]
-                        for i in range(3): # لو عايز تبعت 3 برامج مختلفة مثلاً
-                            x = 11
-                            y = 21
-                            self.VisionClient_ID.send_only(f"{barcode}_{i}")
-                            test_result = self.VisionClient_TRIG.send_request(x)
-                            list_of_results.append(test_result)    
-                            result = self.cobotClient.send_request(y) # ممكن تبعت إشارة للسيرفر إنه يجهز البرنامج التالي أو يعمل حاجة تانية بين الاختبارات   
-                            x+=1 
-                            y+=1
-                        if 0 in list_of_results:
-                            final_result = "fail"
-                            self.cobotClient.send_only(0)
-                        else:
-                            final_result = "pass"
-                            self.cobotClient.send_only(1)
-                        ex.result_reporting(ID=barcode, serial_num=serial_number, result=final_result)
-                    if program == 4 :
-                        result = self.cobotClient.send_request(4)
-                        list_of_results =[]
-                        for i in range(3): # لو عايز تبعت 3 برامج مختلفة مثلاً
-                            x = 11
-                            y = 21
-                            self.VisionClient_ID.send_only(f"{barcode}_{i}")
-                            test_result = self.VisionClient_TRIG.send_request(x)
-                            list_of_results.append(test_result)    
-                            result = self.cobotClient.send_request(y) # ممكن تبعت إشارة للسيرفر إنه يجهز البرنامج التالي أو يعمل حاجة تانية بين الاختبارات   
-                            x+=1 
-                            y+=1
-                        if 0 in list_of_results:
-                            final_result = "fail"
-                            self.cobotClient.send_only(0)
-                        else:
-                            final_result = "pass"
-                            self.cobotClient.send_only(1)
-                        ex.result_reporting(ID=barcode, serial_num=serial_number, result=final_result)
-                           
-                    if program == 5 :
-                        result = self.cobotClient.send_request(5)
-                        list_of_results =[]
-                        for i in range(3): # لو عايز تبعت 3 برامج مختلفة مثلاً
-                            x = 11
-                            y = 21
-                            self.VisionClient_ID.send_only(f"{barcode}_{i}")
-                            test_result = self.VisionClient_TRIG.send_request(x)
-                            list_of_results.append(test_result)    
-                            result = self.cobotClient.send_request(y) # ممكن تبعت إشارة للسيرفر إنه يجهز البرنامج التالي أو يعمل حاجة تانية بين الاختبارات   
-                            x+=1 
-                            y+=1
-                        if 0 in list_of_results:
-                            final_result = "fail"
-                            self.cobotClient.send_only(0)
-                        else:
-                            final_result = "pass"
-                            self.cobotClient.send_only(1)
-                        ex.result_reporting(ID=barcode, serial_num=serial_number, result=final_result)  # تخلص التعامل مع الداتا، ممكن تحطها في كيو تاني
-                except Exception as e:
-                    print(f"Error in sequence handler: {e}")
-                    break
-        pass
+                    program_int = int(program)
+                except (TypeError, ValueError):
+                    log.warning(f"Skipping barcode {barcode}: program lookup returned {program!r}")
+                    continue
+
+                final_result = self._run_test_program(program_int, barcode)
+                ex.result_reporting(ID=barcode, serial_num=serial_number, result=final_result)
+                log.info(f"Done barcode={barcode} program={program} result={final_result}")
+
+            except Exception as e:
+                log.exception(f"Error processing barcode {barcode}: {e}")
+            finally:
+                self.vision_queue.task_done()
+
 
     def run(self):
         self.VisionClient_TRIG.start_reconnection_watchdog()
         self.VisionClient_ID.start_reconnection_watchdog()
         self.cobotClient.start_reconnection_watchdog()
-        self.triggerserver.start_listening(self.sequance_handler) # تعيين الـ Callback
+        self.triggerserver.start_listening(self.sequance_handler)
 
         LoggedThread(
             target=self.get_barcode_from_scanner,
@@ -673,9 +713,36 @@ class App():
             daemon=True,
         ).start()
 
-################################################################"""
+        LoggedThread(
+            target=self._sequance_worker,
+            name="App-sequance-worker",
+            daemon=True,
+        ).start()
 
+    def stop(self):
+        """Stop all workers and disconnect cleanly."""
+        self._stop_app.set()
+        for client in (self.VisionClient_TRIG, self.VisionClient_ID, self.cobotClient):
+            try:
+                client.disconnect()
+            except Exception:
+                pass
+        try:
+            self.triggerserver.stop()
+        except Exception:
+            pass
 
-
-
-
+    def stop(self):
+        """Stop all workers and disconnect cleanly."""
+        self._stop_app.set()
+        for client in (self.VisionClient_TRIG, self.VisionClient_ID, self.cobotClient):
+            try:
+                client.disconnect()
+            except Exception:
+                pass
+        try:
+            self.triggerserver.stop()
+        except Exception:
+            pass
+            pass
+            pass

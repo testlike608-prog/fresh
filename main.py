@@ -11,17 +11,37 @@ log = thread_logger.setup(watchdog_interval=2.0)
 def scanner_thread():
     scanner.start_listener()
 
+
 if __name__ == "__main__":
     log.info("=== main.py: program starting ===")
-    app= cc.App()
-    thread_logger.LoggedThread(target=scanner_thread, name="scanner-listener", daemon=True).start()
+    app = cc.App()
 
-    # ── Debug monitor (يشتغل لما DEBUG=1) ─────────────────────────────
-    if debug_monitor.is_enabled():
-        debug_monitor.start(app_ref=app)
+    thread_logger.LoggedThread(
+        target=scanner_thread,
+        name="scanner-listener",
+        daemon=True,
+    ).start()
 
-    app.run()  # ده شغّال على الـ main thread7293147930221041450501
+    # ── Debug monitor — بنخليها فعّالة دايماً (مش محتاجه DEBUG=1) ─────────
+    # لو عايز تطفيها مرّر force=False وحدد DEBUG=0 في الـ environment.
+    debug_monitor.start(app_ref=app, interval=5.0, force=True)
 
-    keyboard.wait('esc')  # يقفل البرنامج لما تدوس esc
-    scanner.stop_listener()  # تأكد إنك بتوقف الـ listener لما البرنامج يخلص
-    log.info("=== main.py: program exited ===")
+    app.run()  # بيشغل threads ويرجع فوراً
+
+    try:
+        keyboard.wait('esc')  # يقفل البرنامج لما تدوس esc
+    finally:
+        log.info("Esc pressed — shutting down...")
+        try:
+            scanner.stop_listener()  # وقف الـ keyboard listener
+        except Exception as e:
+            log.warning(f"scanner.stop_listener failed: {e}")
+        try:
+            app.stop()  # وقف كل الـ TCPClients والـ TCPServer
+        except Exception as e:
+            log.warning(f"app.stop failed: {e}")
+        try:
+            debug_monitor.stop()
+        except Exception:
+            pass
+        log.info("=== main.py: program exited ===")
