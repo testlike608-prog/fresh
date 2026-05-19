@@ -1,10 +1,19 @@
+"""
+main.py
+-------
+Entry point للنسخه الـ headless (بدون GUI).
+للـ GUI استخدم: python gui_app.py
+
+الـ exe المبني بـ Nuitka بيشغل gui_app.py مش main.py.
+"""
+
 import keyboard
 import ClientsClass as cc
 import scanner
 import debug_monitor
 import thread_logger
 
-# ── إعداد اللوج للثريدز و الكراش (لازم يتنده الأول) ────────────────
+# اعداد اللوج للثريدز و الكراش (لازم يتنده الأول)
 log = thread_logger.setup(watchdog_interval=2.0)
 
 
@@ -22,8 +31,7 @@ if __name__ == "__main__":
         daemon=True,
     ).start()
 
-    # ── Debug monitor — بنخليها فعّالة دايماً (مش محتاجه DEBUG=1) ─────────
-    # لو عايز تطفيها مرّر force=False وحدد DEBUG=0 في الـ environment.
+    # Debug monitor (بنخليها فعّالة دايماً)
     debug_monitor.start(app_ref=app, interval=5.0, force=True)
 
     app.run()  # بيشغل threads ويرجع فوراً
@@ -31,13 +39,13 @@ if __name__ == "__main__":
     try:
         keyboard.wait('esc')  # يقفل البرنامج لما تدوس esc
     finally:
-        log.info("Esc pressed — shutting down...")
+        log.info("Esc pressed - shutting down...")
         try:
-            scanner.stop_listener()  # وقف الـ keyboard listener
+            scanner.stop_listener()
         except Exception as e:
             log.warning(f"scanner.stop_listener failed: {e}")
         try:
-            app.stop()  # وقف كل الـ TCPClients والـ TCPServer
+            app.stop()
         except Exception as e:
             log.warning(f"app.stop failed: {e}")
         try:

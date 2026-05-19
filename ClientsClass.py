@@ -260,9 +260,13 @@ class  TCPClient():
                 self._log_add("INFO", "✅ Reconnected successfully!")
                 break
             else:
-                self._log_add("WARNING", "❌ Retrying in 5 seconds...")
-                # نوم قابل للإيقاف فوراً عن طريق _stop_monitor.set()
-                if self._stop_monitor.wait(timeout=5):
+                try:
+                    from config import config as _cfg
+                    delay = float(_cfg.get("reconnect_retry_delay", 5.0))
+                except Exception:
+                    delay = 5.0
+                self._log_add("WARNING", f"❌ Retrying in {delay} seconds...")
+                if self._stop_monitor.wait(timeout=delay):
                     break
     
     def start_reconnection_watchdog(self):
@@ -331,8 +335,13 @@ class  TCPClient():
                             pass
                         self.sock = None
 
-            # فحص كل 3 ثواني، لكن قابل للإيقاف فوراً
-            if self._stop_monitor.wait(timeout=3):
+            # فحص كل N ثواني (من config) — قابل للإيقاف فوراً
+            try:
+                from config import config as _cfg
+                check_interval = float(_cfg.get("reconnect_check_interval", 3.0))
+            except Exception:
+                check_interval = 3.0
+            if self._stop_monitor.wait(timeout=check_interval):
                 break
 
         log.info(f"Connection watchdog stopped for {self.name}")
@@ -530,6 +539,52 @@ class  TCPClient():
                 return False
 
 ##################################################################
+class AppStage:
+    """
+    المراحل اللي ممكن البرنامج يكون فيها — قراءتها بتقول لك إنت واقف فين.
+    الـ GUI بيستخدمها يعرض الشكل والـ progress.
+    """
+    IDLE             = "IDLE"               # مفيش حاجه شغّاله — بنستنى باركود
+    BARCODE_RECEIVED = "BARCODE_RECEIVED"   # وصلنا باركود جديد من الـ scanner
+    PROGRAM_LOOKUP   = "PROGRAM_LOOKUP"     # بنبحث في program_mapping.xlsx
+    SENDING_PROGRAM  = "SENDING_PROGRAM"    # بنبلّغ الكوبوت برقم البرنامج
+    VISION_TEST_1    = "VISION_TEST_1"      # اختبار 1/3
+    VISION_TEST_2    = "VISION_TEST_2"      # اختبار 2/3
+    VISION_TEST_3    = "VISION_TEST_3"      # اختبار 3/3
+    VISION_TEST_4    = "VISION_TEST_4"      # اختبار 4/4
+    VISION_TEST_5    = "VISION_TEST_5"      # اختبار 5/4
+    VISION_TEST_6    = "VISION_TEST_6"      # اختبار 6/4
+
+    REPORTING        = "REPORTING"          # بنكتب في results_report.xlsx
+    DONE             = "DONE"               # خلصنا الباركود ده
+    ERROR            = "ERROR"              # حصل غلط
+
+    # عدد دورات اختبار الرؤية في كل برنامج
+    VISION_TEST_COUNT = 6
+
+    # ترتيب المراحل عشان الـ progress bar
+    ORDER = [
+        IDLE, BARCODE_RECEIVED, PROGRAM_LOOKUP, SENDING_PROGRAM,
+        VISION_TEST_1, VISION_TEST_2, VISION_TEST_3, VISION_TEST_4, VISION_TEST_5, VISION_TEST_6, REPORTING, DONE,
+    ]
+
+    LABELS = {
+        IDLE:             "في الانتظار",
+        BARCODE_RECEIVED: "تم استقبال باركود",
+        PROGRAM_LOOKUP:   "البحث عن البرنامج",
+        SENDING_PROGRAM:  "إرسال البرنامج للكوبوت",
+        VISION_TEST_1:    "اختبار الرؤية 1/4",
+        VISION_TEST_2:    "اختبار الرؤية 2/4",
+        VISION_TEST_3:    "اختبار الرؤية 3/4",
+        VISION_TEST_4:    "اختبار الرؤية 4/4",
+        VISION_TEST_5:    "اختبار الرؤية 5/4",
+        VISION_TEST_6:    "اختبار الرؤية 6/4",
+        REPORTING:        "كتابة التقرير",
+        DONE:             "انتهى",
+        ERROR:            "خطأ",
+    }
+
+
 class App():
     def __init__(self):
 
@@ -538,12 +593,88 @@ class App():
         # علم لإيقاف العامل (sequance worker) عند الخروج
         self._stop_app = threading.Event()
 
-        self.VisionClient_TRIG = TCPClient("127.0.0.1", 8081, name="VisionClient_TRIG")
-        self.VisionClient_ID = TCPClient("127.0.0.1", 8080, name="VisionClient_ID")
-        self.cobotClient = TCPClient("192.168.57.2", 9000, name="cobotClient")
+        # ── الـ IPs/Ports جايين من config (قابلين للتعديل من الـ GUI) ────
+        # ملحوظه: __init__ بس بيبني الـ objects. مفيش حاجه بتتصل ولا server بيقوم
+        # لحد ما يتنده start(). ده عشان الـ GUI تكون كاملة قبل البدء.
+        from config import config as _cfg
 
-        self.triggerserver = TCPServer(ip="0.0.0.0", port=5000)
-        self.triggerserver.start() # تشغيل السيرفر فوراً في الكونستركتور
+        self.VisionClient_TRIG = TCPClient(
+            _cfg.get("vision_trig_ip"), _cfg.get("vision_trig_port"),
+            buffer_size=_cfg.get("tcp_buffer_size", 4096),
+            name="VisionClient_TRIG",
+        )
+        self.VisionClient_ID = TCPClient(
+            _cfg.get("vision_id_ip"), _cfg.get("vision_id_port"),
+            buffer_size=_cfg.get("tcp_buffer_size", 4096),
+            name="VisionClient_ID",
+        )
+        self.cobotClient = TCPClient(
+            _cfg.get("cobot_ip"), _cfg.get("cobot_port"),
+            buffer_size=_cfg.get("tcp_buffer_size", 4096),
+            name="cobotClient",
+        )
+
+        # السيرفر اتعمل لكن مش هيقوم لحد ما start()
+        self.triggerserver = TCPServer(
+            ip=_cfg.get("trigger_server_ip"),
+            port=_cfg.get("trigger_server_port"),
+            buffer_size=_cfg.get("tcp_buffer_size", 4096),
+        )
+
+        # ── State tracking للـ GUI ─────────────────────────────────────
+        # الـ GUI بيقرا الحالات دي كل ثانية ويعرضها في الـ Status panel
+        self.current_stage = AppStage.IDLE
+        self.current_barcode = None
+        self.current_program = None
+        self.current_step = 0     # 0, 1, 2, 3 (لـ vision tests)
+        self.last_event_time = time.time()
+        self.start_time = time.time()
+        self.stats = {
+            "total":    0,
+            "pass":     0,
+            "fail":     0,
+            "errors":   0,
+            "skipped":  0,   # الباركودات اللي حرفها مش لاقيه في الإكسل
+        }
+        self._state_lock = threading.Lock()
+
+        # ── Start/Stop control ─────────────────────────────────────────
+        # الـ GUI بتستخدم is_running عشان تعرف لون الزرار وحالة البرنامج
+        self.is_running = False
+        self._start_stop_lock = threading.Lock()
+
+    def _set_stage(self, stage, **extra):
+        """ضبط الـ stage الحالي + أي حقول إضافية بـ thread-safe."""
+        with self._state_lock:
+            self.current_stage = stage
+            self.last_event_time = time.time()
+            for k, v in extra.items():
+                setattr(self, k, v)
+
+    def get_state_snapshot(self):
+        """يرجع dict فيه كل الحالة الحالية — مفيد للـ GUI."""
+        with self._state_lock:
+            return {
+                "is_running":      self.is_running,
+                "stage":           self.current_stage,
+                "barcode":         self.current_barcode,
+                "program":         self.current_program,
+                "step":            self.current_step,
+                "last_event_time": self.last_event_time,
+                "uptime":          time.time() - self.start_time,
+                "stats":           dict(self.stats),
+                "queue_sizes": {
+                    "vision_queue":  self.vision_queue.qsize(),
+                    "report_queue":  self.report_queue.qsize(),
+                    "scanner_queue": sc.queue_barcode.qsize(),
+                },
+                "connections": {
+                    "VisionClient_TRIG": self.VisionClient_TRIG.connected,
+                    "VisionClient_ID":   self.VisionClient_ID.connected,
+                    "cobotClient":       self.cobotClient.connected,
+                    "triggerserver":     self.triggerserver.running,
+                },
+            }
         
 
     def get_barcode_from_scanner(self):
@@ -584,7 +715,11 @@ class App():
         return None
 
 
-    def determine_program_from_barcode(self, barcode, excel_file_path="program_mapping.xlsx"):
+    def determine_program_from_barcode(self, barcode, excel_file_path=None):
+        # نقرأ الـ default من config لو ماتمررش
+        if excel_file_path is None:
+            from config import config as _cfg
+            excel_file_path = _cfg.get("program_mapping_file", "program_mapping.xlsx")
         self.cobotClient._log_add("INFO", f"Determining program for barcode: {barcode}")
         target_char = barcode[-3]
         self.cobotClient._log_add("INFO", f"Target character for barcode {barcode}: {target_char}")
@@ -638,111 +773,250 @@ class App():
     def _run_test_program(self, program, barcode):
         """
         ينفّذ تتابع فحص واحد (المنطق المشترك بين برامج 1-5).
-        - بيبعت رقم البرنامج للكوبوت
-        - بيلف 3 مرات: يبعت ID + يستنى نتيجه من الفيجن + يبلغ الكوبوت
-        - يحدد pass/fail بناءً على لو فيه 0 في النتائج
-        - يبعت إشارة نهائية للكوبوت (للبرامج 3-5 بس زي ما كان في الكود الأصلي)
+        بيحدّث self.current_stage في كل خطوة عشان الـ GUI تتابع.
+
         :return: "pass" أو "fail"
         """
         program = int(program)
-        # برنامج 1 بيستخدم send_only بدل send_request زي ما كان في الكود الأصلي
-        if program :
-            self.cobotClient.send_request(program)
-            list_of_results = []
-            for i in range(3):
-                x = 11 + i
-                y = 21 + i
-                self.VisionClient_ID.send_only(f"{barcode}_{i}")
-                test_result = self.VisionClient_TRIG.send_request(x)
-                list_of_results.append(test_result)
-                # إشارة بين الاختبارات
-                self.cobotClient.send_request(y)
 
-            final_result = "fail" if 0 in list_of_results else "pass"
-        # برامج 3-5 بتبعت إشارة نهائية للكوبوت (نفس منطق الكود الأصلي)
-            self.cobotClient.send_only(0 if final_result == "fail" else 1)
+        # 1. إرسال رقم البرنامج للكوبوت
+        self._set_stage(AppStage.SENDING_PROGRAM, current_program=program)
+        
+        self.cobotClient.send_request(program)
+
+        stage_map = {
+            0: AppStage.VISION_TEST_1,
+            1: AppStage.VISION_TEST_2,
+            2: AppStage.VISION_TEST_3,
+            3: AppStage.VISION_TEST_4,
+            4: AppStage.VISION_TEST_5,
+            5: AppStage.VISION_TEST_6,
+        }
+
+        list_of_results = []
+        # 6 دورات اختبار: نبعت ID للفيجن + trigger + نستلم النتيجه + نبلّغ الكوبوت
+        for i in range(AppStage.VISION_TEST_COUNT):  # = 6
+            self._set_stage(stage_map[i], current_step=i + 1)
+            x = 11 + i   # 11, 12, 13, 14 — قيم الـ trigger
+            y = 21 + i   # 21, 22, 23, 24 — إشارات بين الاختبارات للكوبوت
+            self.VisionClient_ID.send_only(f"{barcode}_{i}")
+            raw_result = self.VisionClient_TRIG.send_request(x)
+            # ── BUG FIX ─────────────────────────────────────────────
+            # send_request بيرجع bytes (زي b"0" أو b"1")، مش int. لو سيبناها
+            # bytes الـ check `0 in list_of_results` هيدور على integer 0 ومش
+            # هيلاقيه أبدًا في list of bytes → كل حاجه بتطلع pass غلط!
+            # هنا بنحوّل الرد لـ int بشكل آمن.
+            parsed = self._parse_vision_response(raw_result)
+            self.cobotClient._log_add(
+                "INFO",
+                f"Vision test {i+1}/{AppStage.VISION_TEST_COUNT}: raw={raw_result!r} parsed={parsed}",
+            )
+            list_of_results.append(parsed)
+            self.cobotClient.send_request(y)
+
+        # لو فيه أي 0 (أو None للأخطاء) → fail
+        # 0 = fail من الفيجن
+        # None = timeout أو error في الاتصال — نعتبره fail برضو لأمان
+        final_result = "fail" if any(r == 0 or r is None for r in list_of_results) else "pass"
+        self.cobotClient.send_only(0 if final_result == "fail" else 1)
 
         return final_result
 
+    @staticmethod
+    def _parse_vision_response(raw):
+        """
+        يحوّل رد الفيجن (bytes/str/None) لـ int أو None لو مش قادر.
+        أمثلة:
+          b"0"    → 0
+          b"1"    → 1
+          b"1\r\n"→ 1
+          "1"     → 1
+          0       → 0  (لو الـ socket رجّع int لأي سبب)
+          None    → None  (timeout/error)
+          b""     → None  (connection closed)
+        """
+        if raw is None:
+            return None
+        if isinstance(raw, (int, float)):
+            return int(raw)
+        if isinstance(raw, (bytes, bytearray)):
+            text = raw.decode("utf-8", errors="ignore").strip()
+        else:
+            text = str(raw).strip()
+        if not text:
+            return None
+        # نحاول int مباشرة
+        try:
+            return int(text)
+        except ValueError:
+            pass
+        # محاولة float ثم int (لو الرد جه "1.0" مثلاً)
+        try:
+            return int(float(text))
+        except ValueError:
+            return None
+
     def _sequance_worker(self):
-        """
-        العامل الرئيسي: بيستلم باركودات من vision_queue وينفّذ تتابع الفحص.
-        ده اللي كان غلط متحط جوّا الـ callback — دلوقتي في thread منفصل.
-        """
+        """العامل الرئيسي: بيستلم باركودات من vision_queue وينفّذ تتابع الفحص."""
         log = _get_thread_logger()
-        log.info("Sequance worker started — waiting for barcodes in vision_queue...")
+        log.info("Sequance worker started - waiting for barcodes in vision_queue...")
 
         while not self._stop_app.is_set():
             try:
-                # blocking get مع timeout عشان نقدر نخرج لما _stop_app يتفعّل
                 barcode = self.vision_queue.get(timeout=0.5)
             except queue.Empty:
                 continue
 
             try:
+                # 1. وصل باركود جديد
+                self._set_stage(
+                    AppStage.BARCODE_RECEIVED,
+                    current_barcode=barcode, current_step=0,
+                )
+
+                # 2. البحث عن البرنامج
+                self._set_stage(AppStage.PROGRAM_LOOKUP)
                 program = self.determine_program_from_barcode(barcode)
                 serial_number = self.extract_serial_number(barcode)
 
-                # لو determine رجع نص خطأ بدل رقم، نعرضه ونتجاهل الباركود
-                # نستخدم try/int بدل isinstance لأن pandas/numpy بترجع np.int64 مش int
                 try:
                     program_int = int(program)
                 except (TypeError, ValueError):
-                    log.warning(f"Skipping barcode {barcode}: program lookup returned {program!r}")
+                    # الحرف مش موجود في الإكسل → نتجاهل الباركود ونرجع نستنى scan تاني
+                    log.warning(
+                        f"⚠ Barcode {barcode}: char not in mapping file "
+                        f"(lookup returned {program!r}). Waiting for next scan..."
+                    )
+                    with self._state_lock:
+                        self.stats["skipped"] += 1
+                    # نرجع الـ stage لـ IDLE (مش ERROR) ونستنى الباركود اللي بعده
+                    self._set_stage(
+                        AppStage.IDLE,
+                        current_barcode=None,
+                        current_program=None,
+                        current_step=0,
+                    )
                     continue
 
+                # 3. تنفيذ سيكوينس الاختبار (Cobot + Vision)
                 final_result = self._run_test_program(program_int, barcode)
+
+                # 4. كتابة التقرير
+                self._set_stage(AppStage.REPORTING)
                 ex.result_reporting(ID=barcode, serial_num=serial_number, result=final_result)
-                log.info(f"Done barcode={barcode} program={program} result={final_result}")
+
+                # 5. تحديث الإحصائيات
+                with self._state_lock:
+                    self.stats["total"] += 1
+                    self.stats[final_result] = self.stats.get(final_result, 0) + 1
+
+                # 6. خلصنا
+                self._set_stage(AppStage.DONE)
+                log.info(f"Done barcode={barcode} program={program_int} result={final_result}")
+
+                time.sleep(0.5)
+                self._set_stage(AppStage.IDLE, current_step=0)
 
             except Exception as e:
                 log.exception(f"Error processing barcode {barcode}: {e}")
+                self._set_stage(AppStage.ERROR)
+                with self._state_lock:
+                    self.stats["errors"] += 1
             finally:
                 self.vision_queue.task_done()
 
+    def start(self):
+        """
+        يشغل البرنامج: يفتح الـ TCP server، يبدأ الـ reconnect watchdogs،
+        ويشغل الـ workers. آمن للنداء أكتر من مرة.
+        """
+        log = _get_thread_logger()
+        with self._start_stop_lock:
+            if self.is_running:
+                log.warning("App.start() called but already running")
+                return True
+
+            log.info("=" * 50)
+            log.info("App: STARTING...")
+            log.info("=" * 50)
+
+            self._stop_app.clear()
+            for client in (self.VisionClient_TRIG, self.VisionClient_ID, self.cobotClient):
+                client._stop_monitor.clear()
+
+            # 1. نشغّل الـ scanner listener — لازم يكون قبل أي حاجه عشان نلتقط
+            #    الباركودات بمجرد ما المستخدم يدوس Start. مفيش keyboard hook قبل ذلك.
+            try:
+                sc.start_listener()
+                log.info("Scanner listener started")
+            except Exception as e:
+                log.warning(f"Scanner listener could not start: {e}")
+
+            # 2. نشغّل الـ TCP server
+            if not self.triggerserver.start():
+                log.error("App.start() failed: TCPServer.start() returned False")
+                # نوقف الـ scanner اللي بدأناه
+                try: sc.stop_listener()
+                except Exception: pass
+                return False
+            self.triggerserver.start_listening(self.sequance_handler)
+
+            self.VisionClient_TRIG.start_reconnection_watchdog()
+            self.VisionClient_ID.start_reconnection_watchdog()
+            self.cobotClient.start_reconnection_watchdog()
+
+            LoggedThread(
+                target=self.get_barcode_from_scanner,
+                name="App-barcode-from-scanner",
+                daemon=True,
+            ).start()
+
+            LoggedThread(
+                target=self._sequance_worker,
+                name="App-sequance-worker",
+                daemon=True,
+            ).start()
+
+            self.is_running = True
+            self.start_time = time.time()
+            self._set_stage(AppStage.IDLE, current_step=0,
+                            current_barcode=None, current_program=None)
+            log.info("App: STARTED successfully")
+            return True
 
     def run(self):
-        self.VisionClient_TRIG.start_reconnection_watchdog()
-        self.VisionClient_ID.start_reconnection_watchdog()
-        self.cobotClient.start_reconnection_watchdog()
-        self.triggerserver.start_listening(self.sequance_handler)
-
-        LoggedThread(
-            target=self.get_barcode_from_scanner,
-            name="App-barcode-from-scanner",
-            daemon=True,
-        ).start()
-
-        LoggedThread(
-            target=self._sequance_worker,
-            name="App-sequance-worker",
-            daemon=True,
-        ).start()
+        """alias قديم - مازال يشتغل عشان الـ tests و main.py."""
+        return self.start()
 
     def stop(self):
-        """Stop all workers and disconnect cleanly."""
-        self._stop_app.set()
-        for client in (self.VisionClient_TRIG, self.VisionClient_ID, self.cobotClient):
-            try:
-                client.disconnect()
-            except Exception:
-                pass
-        try:
-            self.triggerserver.stop()
-        except Exception:
-            pass
+        """إيقاف البرنامج بشكل نضيف. قابل للتشغيل تاني بـ start()."""
+        log = _get_thread_logger()
+        with self._start_stop_lock:
+            if not self.is_running:
+                log.warning("App.stop() called but not running")
+                return
 
-    def stop(self):
-        """Stop all workers and disconnect cleanly."""
-        self._stop_app.set()
-        for client in (self.VisionClient_TRIG, self.VisionClient_ID, self.cobotClient):
+            log.info("App: STOPPING...")
+            self._stop_app.set()
+
+            # نوقف الـ scanner listener (keyboard hook)
             try:
-                client.disconnect()
-            except Exception:
-                pass
-        try:
-            self.triggerserver.stop()
-        except Exception:
-            pass
-            pass
-            pass
+                sc.stop_listener()
+                log.info("Scanner listener stopped")
+            except Exception as e:
+                log.warning(f"scanner.stop_listener failed: {e}")
+
+            for client in (self.VisionClient_TRIG, self.VisionClient_ID, self.cobotClient):
+                try:
+                    client.disconnect()
+                except Exception as e:
+                    log.warning(f"client.disconnect failed: {e}")
+            try:
+                self.triggerserver.stop()
+            except Exception as e:
+                log.warning(f"server.stop failed: {e}")
+
+            self.is_running = False
+            self._set_stage(AppStage.IDLE, current_step=0,
+                            current_barcode=None, current_program=None)
+            log.info("App: STOPPED")
