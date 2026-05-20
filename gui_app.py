@@ -164,10 +164,12 @@ class StageProgressCard(QFrame):
         ("BARCODE_RECEIVED", "استقبال الباركود",       10),
         ("PROGRAM_LOOKUP",   "البحث عن البرنامج",      20),
         ("SENDING_PROGRAM",  "إرسال للكوبوت",          30),
-        ("VISION_TEST_1",    "اختبار الرؤية 1/4",      45),
-        ("VISION_TEST_2",    "اختبار الرؤية 2/4",      58),
-        ("VISION_TEST_3",    "اختبار الرؤية 3/4",      71),
-        ("VISION_TEST_4",    "اختبار الرؤية 4/4",      84),
+        ("VISION_TEST_1",    "Vision test 1/6",      40),
+        ("VISION_TEST_2",    "Vision test 2/6",      50),
+        ("VISION_TEST_3",    "Vision test 3/6",      60),
+        ("VISION_TEST_4",    "Vision test 4/6",      70),
+        ("VISION_TEST_5",    "Vision test 5/6",      80),
+        ("VISION_TEST_6",    "Vision test 6/6",      90),
         ("REPORTING",        "كتابة التقرير",         95),
         ("DONE",             "انتهى",                100),
         ("ERROR",            "خطأ",                  100),
@@ -221,9 +223,13 @@ class StageProgressCard(QFrame):
         steps_layout.addStretch()
         layout.addLayout(steps_layout)
 
-    def set_stage(self, stage_key, barcode=None, program=None, step=0):
+    def set_stage(self, stage_key, barcode=None, program=None, step=0, total_steps=6):
         entry = self.STAGE_MAP.get(stage_key, self.STAGE_MAP["IDLE"])
         _, label, pct = entry
+        total_steps = max(1, min(6, int(total_steps or 6)))
+        if stage_key.startswith("VISION_TEST") and step > 0:
+            label = f"Vision test {step}/{total_steps}"
+            pct = 30 + int((min(step, total_steps) / total_steps) * 60)
 
         self.stage_label.setText(label)
 
@@ -234,7 +240,7 @@ class StageProgressCard(QFrame):
         if program is not None:
             parts.append(f"برنامج: {program}")
         if stage_key.startswith("VISION_TEST") and step > 0:
-            parts.append(f"الخطوة {step}/4")
+            parts.append(f"Step {step}/{total_steps}")
         sub = "  •  ".join(parts) if parts else "جاهز لاستقبال باركود جديد"
         self.sub_label.setText(sub)
 
@@ -244,6 +250,14 @@ class StageProgressCard(QFrame):
         # Dots — نلون اللي عدّت
         passed_so_far = True
         for key, dot in self.step_dots:
+            if key.startswith("VISION_TEST"):
+                try:
+                    if int(key.rsplit("_", 1)[1]) > total_steps:
+                        dot.setVisible(False)
+                        continue
+                except Exception:
+                    pass
+            dot.setVisible(True)
             if key == stage_key:
                 if stage_key == "ERROR":
                     dot.setStyleSheet(f"color: {gui_styles.DANGER}; font-size: 14px;")
@@ -378,6 +392,7 @@ class StatusPage(QWidget):
 
         # حفظ المرجع للـ app عشان نقدر نتحكم فيه
         self._app_ref_for_buttons = None
+        self._app_init_error = None
 
         # ── Stage Progress (كارت كبير) ──
         self.stage_card = StageProgressCard()
@@ -479,15 +494,30 @@ class StatusPage(QWidget):
     def set_app_ref(self, app_ref):
         """يربط الـ Status page بالـ App عشان أزرار Start/Stop تشتغل."""
         self._app_ref_for_buttons = app_ref
+        self._app_init_error = None
         # نضبط حالة الأزرار حسب is_running الحالي
         is_running = bool(getattr(app_ref, "is_running", False)) if app_ref else False
         self.start_btn.setEnabled(not is_running)
         self.stop_btn.setEnabled(is_running)
 
+    def set_app_init_error(self, error):
+        self._app_ref_for_buttons = None
+        self._app_init_error = str(error) if error else None
+        self.start_btn.setEnabled(True)
+        self.stop_btn.setEnabled(False)
+
     def _on_start_clicked(self):
         from PySide6.QtWidgets import QMessageBox
         if not self._app_ref_for_buttons:
-            QMessageBox.warning(self, "خطأ", "الـ App مش متربط بالـ GUI")
+            if self._app_init_error:
+                QMessageBox.critical(
+                    self,
+                    "فشل إنشاء الـ App",
+                    "الـ GUI اشتغل لكن الـ App الداخلي ما اتبناش.\n\n"
+                    f"السبب:\n{self._app_init_error}",
+                )
+            else:
+                QMessageBox.warning(self, "خطأ", "الـ App مش متربط بالـ GUI")
             return
         # نعطل الزرارين أثناء التشغيل عشان مايتدوسش مرتين
         self.start_btn.setEnabled(False)
@@ -619,6 +649,7 @@ class StatusPage(QWidget):
             barcode=state.get("barcode"),
             program=state.get("program"),
             step=state.get("step", 0),
+            total_steps=state.get("vision_test_count", 6),
         )
 
         # Stats
@@ -878,10 +909,11 @@ class SettingsPage(QWidget):
 # ════════════════════════════════════════════════════════════════════
 class MainWindow(QMainWindow):
 
-    def __init__(self, app_ref=None, log_emitter=None, parent=None):
+    def __init__(self, app_ref=None, log_emitter=None, app_init_error=None, parent=None):
         super().__init__(parent)
         self.app_ref = app_ref
         self.log_emitter = log_emitter
+        self._app_init_error = app_init_error
 
         self._theme = "dark"
         self.setWindowTitle("Test Station Controller")
@@ -915,6 +947,8 @@ class MainWindow(QMainWindow):
         # من غير السطر ده الزرار هيرمي "الـ App مش متربط بالـ GUI"
         if app_ref is not None:
             self.status_page.set_app_ref(app_ref)
+        elif self._app_init_error:
+            self.status_page.set_app_init_error(self._app_init_error)
 
         self.content.addWidget(self.status_page)
         self.content.addWidget(self.logs_page)
@@ -1032,6 +1066,7 @@ def main():
     # scanner.start_listener() now runs inside App.start(), so no keyboard hook
     # is active until the user presses Start.
     app_ref = None
+    app_init_error = None
     try:
         import ClientsClass as cc
         import debug_monitor
@@ -1039,11 +1074,12 @@ def main():
         debug_monitor.start(app_ref=app_ref, interval=2.0, force=True, verbose_console=False)
         log.info("=== GUI: App created (STOPPED by default) ===")
     except Exception as e:
+        app_init_error = e
         log.exception(f"Could not create App: {e}")
 
     install_qt_handler(emitter, capture_stdout=True)
 
-    win = MainWindow(app_ref=app_ref, log_emitter=emitter)
+    win = MainWindow(app_ref=app_ref, log_emitter=emitter, app_init_error=app_init_error)
     win.show()
     log.info("=== GUI: window shown - default state is STOPPED, press Start to begin ===")
     return qapp.exec()

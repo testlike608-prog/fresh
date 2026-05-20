@@ -71,6 +71,7 @@ DEFAULT_CONFIG = {
     # ── File paths (نسبياً للـ working dir) ───────────────────────
     "program_mapping_file": "program_mapping.xlsx",
     "results_report_file":  "results_report.xlsx",
+    "vision_test_count": 6,
 
     # ── Intervals (بالثواني) ──────────────────────────────────────
     "watchdog_interval":         2.0,    # thread watchdog (thread_logger)

@@ -204,7 +204,10 @@ class FieldRow(QWidget):
 
         if kind == "int":
             self.input = QSpinBox()
-            self.input.setRange(0, 999999)
+            if key == "vision_test_count":
+                self.input.setRange(1, 6)
+            else:
+                self.input.setRange(0, 999999)
             self.input.setValue(int(value))
             self.input.setMinimumWidth(280)
         elif kind == "float":
@@ -330,6 +333,13 @@ class SettingsPage(QWidget):
             ("Results report",  "results_report_file",  "text"),
         ])
         layout.addWidget(files_card)
+
+        # â”€â”€â”€ Test sequence card â”€â”€â”€
+        layout.addWidget(self._make_section_label("Test Sequence"))
+        sequence_card = self._make_card([
+            ("Vision test count", "vision_test_count", "int"),
+        ])
+        layout.addWidget(sequence_card)
 
         # ─── Intervals card ───
         layout.addWidget(self._make_section_label("الفترات الزمنية (Intervals — seconds)"))
