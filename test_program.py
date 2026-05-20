@@ -367,12 +367,14 @@ class TestFourIterationSequence(unittest.TestCase):
             "cobot_port":       config.get("cobot_port"),
             "cobot_ip":         config.get("cobot_ip"),
             "trigger_server_port": config.get("trigger_server_port"),
+            "vision_test_count": config.get("vision_test_count"),
         }
         config.set("vision_trig_port", self.port_trig)
         config.set("vision_id_port",   self.port_id)
         config.set("cobot_port",       self.port_cob)
         config.set("cobot_ip",         "127.0.0.1")
         config.set("trigger_server_port", _get_free_port())
+        config.set("vision_test_count", 6)
 
     def tearDown(self):
         self.stop.set()
@@ -406,8 +408,8 @@ class TestFourIterationSequence(unittest.TestCase):
         threading.Thread(target=srv, daemon=True).start()
         return received, port
 
-    def test_four_vision_triggers_per_barcode(self):
-        """نتأكد إن كل باركود بيبعت 4 triggers للـ VisionTRIG و 4 IDs للـ VisionID."""
+    def test_six_vision_triggers_per_barcode(self):
+        """نتأكد إن كل باركود بيبعت 6 triggers للـ VisionTRIG و 6 IDs للـ VisionID."""
         app = ClientsClass.App()
         try:
             app.run()
@@ -416,18 +418,18 @@ class TestFourIterationSequence(unittest.TestCase):
             app.vision_queue.put("2605TL0000001BGSI")  # G → program 2
             time.sleep(3)
 
-            self.assertEqual(len(self.recv_trig), 4,
-                             f"VisionTRIG لازم يستلم 4 رسائل (واحدة لكل iteration). استلم {len(self.recv_trig)}")
-            self.assertEqual(len(self.recv_id), 4,
-                             f"VisionID لازم يستلم 4 رسائل. استلم {len(self.recv_id)}")
-            # الكوبوت: 1 program + 4 y signals + 1 final = 6
-            self.assertEqual(len(self.recv_cob), 6,
-                             f"Cobot لازم يستلم 6 رسائل (1 program + 4 y + 1 final). استلم {len(self.recv_cob)}")
+            self.assertEqual(len(self.recv_trig), 6,
+                             f"VisionTRIG لازم يستلم 6 رسائل (واحدة لكل iteration). استلم {len(self.recv_trig)}")
+            self.assertEqual(len(self.recv_id), 6,
+                             f"VisionID لازم يستلم 6 رسائل. استلم {len(self.recv_id)}")
+            # الكوبوت: 1 program + 6 y signals + 1 final = 8
+            self.assertEqual(len(self.recv_cob), 8,
+                             f"Cobot لازم يستلم 8 رسائل (1 program + 6 y + 1 final). استلم {len(self.recv_cob)}")
         finally:
             app.stop()
 
     def test_id_messages_have_correct_indices(self):
-        """نتأكد إن الـ IDs المبعوتة للـ VisionID فيها _0 لحد _3."""
+        """نتأكد إن الـ IDs المبعوتة للـ VisionID فيها _0 لحد _5."""
         app = ClientsClass.App()
         try:
             app.run()
@@ -436,8 +438,8 @@ class TestFourIterationSequence(unittest.TestCase):
             time.sleep(3)
 
             id_messages = [m.decode() for m in self.recv_id]
-            self.assertEqual(len(id_messages), 4)
-            for i in range(4):
+            self.assertEqual(len(id_messages), 6)
+            for i in range(6):
                 expected = f"BARCODE_TEST_BGSI_{i}"
                 self.assertIn(expected, id_messages,
                               f"VisionID مفروض يستلم '{expected}' بس كان عنده {id_messages}")
@@ -445,7 +447,7 @@ class TestFourIterationSequence(unittest.TestCase):
             app.stop()
 
     def test_cobot_messages_are_correct(self):
-        """نتأكد إن الكوبوت بياخد: program 2 + y=21,22,23,24 + final (1=pass)."""
+        """نتأكد إن الكوبوت بياخد: program 2 + y=21..26 + final (1=pass)."""
         app = ClientsClass.App()
         try:
             app.run()
@@ -454,11 +456,28 @@ class TestFourIterationSequence(unittest.TestCase):
             time.sleep(3)
 
             cob_msgs = [m.decode() for m in self.recv_cob]
-            # awaited: "2" (program), "21", "22", "23", "24" (y signals), "1" (final pass)
+            # awaited: "2" (program), "21".."26" (y signals), "1" (final pass)
             self.assertIn("2", cob_msgs, "program 2 مفروض يتبعت")
-            for y in ("21", "22", "23", "24"):
+            for y in ("21", "22", "23", "24", "25", "26"):
                 self.assertIn(y, cob_msgs, f"y signal {y} مفروض يتبعت")
             self.assertIn("1", cob_msgs, "final pass signal (1) مفروض يتبعت")
+        finally:
+            app.stop()
+
+    def test_configurable_vision_test_count(self):
+        """vision_test_count من config يتحكم في عدد دورات الفيجن."""
+        from config import config
+        config.set("vision_test_count", 3)
+        app = ClientsClass.App()
+        try:
+            app.run()
+            time.sleep(1.5)
+            app.vision_queue.put("2605TL0000001BGSI")
+            time.sleep(3)
+
+            self.assertEqual(len(self.recv_trig), 3)
+            self.assertEqual(len(self.recv_id), 3)
+            self.assertEqual(len(self.recv_cob), 5)  # program + 3 y signals + final
         finally:
             app.stop()
 
@@ -540,26 +559,35 @@ class TestConfigIntegration(unittest.TestCase):
 #                           AppStage validation
 # ════════════════════════════════════════════════════════════════════════════
 class TestAppStage(unittest.TestCase):
-    """يتأكد إن AppStage فيها 4 vision tests."""
+    """يتأكد إن AppStage فيها 6 vision tests."""
 
-    def test_vision_test_count_is_4(self):
-        self.assertEqual(ClientsClass.AppStage.VISION_TEST_COUNT, 4)
+    def test_vision_test_count_is_6(self):
+        self.assertEqual(ClientsClass.AppStage.VISION_TEST_COUNT, 6)
 
-    def test_all_four_vision_stages_exist(self):
-        for n in (1, 2, 3, 4):
+    def test_vision_test_count_comes_from_config(self):
+        from config import config
+        original = config.get("vision_test_count")
+        try:
+            config.set("vision_test_count", 2)
+            self.assertEqual(ClientsClass.AppStage.get_vision_test_count(), 2)
+        finally:
+            config.set("vision_test_count", original)
+
+    def test_all_six_vision_stages_exist(self):
+        for n in (1, 2, 3, 4, 5, 6):
             stage = getattr(ClientsClass.AppStage, f"VISION_TEST_{n}")
             self.assertEqual(stage, f"VISION_TEST_{n}")
 
-    def test_order_contains_all_4_vision_tests(self):
+    def test_order_contains_all_6_vision_tests(self):
         order = ClientsClass.AppStage.ORDER
-        for n in (1, 2, 3, 4):
+        for n in (1, 2, 3, 4, 5, 6):
             self.assertIn(f"VISION_TEST_{n}", order)
 
-    def test_labels_contain_4_of_4(self):
+    def test_labels_contain_6_of_6(self):
         labels = ClientsClass.AppStage.LABELS
-        for n in (1, 2, 3, 4):
+        for n in (1, 2, 3, 4, 5, 6):
             label = labels.get(f"VISION_TEST_{n}", "")
-            self.assertIn(f"{n}/4", label, f"label VISION_TEST_{n} should say {n}/4")
+            self.assertIn(f"{n}/6", label, f"label VISION_TEST_{n} should say {n}/6")
 
 
 if __name__ == "__main__":

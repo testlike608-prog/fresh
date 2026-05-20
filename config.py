@@ -71,6 +71,13 @@ DEFAULT_CONFIG = {
     # ── File paths (نسبياً للـ working dir) ───────────────────────
     "program_mapping_file": "program_mapping.xlsx",
     "results_report_file":  "results_report.xlsx",
+    "vision_test_count": 6,
+
+    # ── Result images ─────────────────────────────────────────────
+    # الفولدر الأساسي اللي فيه صور النتيجة (مسار مطلق أو نسبي للـ working dir)
+    "result_images_folder": "result_images",
+    # فولدرات إضافية تتنسخ فيها نسخة من كل صورة نتيجة (نسخ احتياطية)
+    "result_images_backup_folders": [],
 
     # ── Intervals (بالثواني) ──────────────────────────────────────
     "watchdog_interval":         2.0,    # thread watchdog (thread_logger)

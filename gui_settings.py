@@ -17,6 +17,7 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QPushButton,
     QFrame, QLineEdit, QSpinBox, QDoubleSpinBox, QDialog, QDialogButtonBox,
     QMessageBox, QScrollArea, QSizePolicy, QSpacerItem, QFormLayout,
+    QFileDialog, QListWidget,
 )
 
 import gui_styles
@@ -204,7 +205,10 @@ class FieldRow(QWidget):
 
         if kind == "int":
             self.input = QSpinBox()
-            self.input.setRange(0, 999999)
+            if key == "vision_test_count":
+                self.input.setRange(1, 6)
+            else:
+                self.input.setRange(0, 999999)
             self.input.setValue(int(value))
             self.input.setMinimumWidth(280)
         elif kind == "float":
@@ -236,6 +240,147 @@ class FieldRow(QWidget):
 
     def set_editable(self, editable: bool):
         self.input.setEnabled(editable)
+
+
+# ════════════════════════════════════════════════════════════════════
+#                       Folder Row (مع زرار Browse)
+# ════════════════════════════════════════════════════════════════════
+class FolderRow(QWidget):
+    """صف فيه label + حقل مسار + زرار Browse لاختيار فولدر من الجهاز."""
+
+    kind = "folder"
+
+    def __init__(self, label, key, value, parent=None):
+        super().__init__(parent)
+        self.key = key
+
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(0, 4, 0, 4)
+        layout.setSpacing(12)
+
+        lbl = QLabel(label)
+        lbl.setStyleSheet("font-weight: 500; min-width: 200px;")
+        lbl.setMinimumWidth(200)
+        layout.addWidget(lbl)
+
+        self.input = QLineEdit(str(value))
+        self.input.setObjectName("FilterEdit")
+        self.input.setMinimumWidth(200)
+        self.input.setEnabled(False)
+        layout.addWidget(self.input, 1)
+
+        self.browse_btn = QPushButton("📂  Browse")
+        self.browse_btn.setObjectName("SecondaryBtn")
+        self.browse_btn.setEnabled(False)
+        self.browse_btn.clicked.connect(self._on_browse)
+        layout.addWidget(self.browse_btn)
+
+    def _on_browse(self):
+        start = self.input.text().strip()
+        folder = QFileDialog.getExistingDirectory(
+            self, "اختر فولدر صور النتيجة", start
+        )
+        if folder:
+            self.input.setText(folder)
+
+    def value(self):
+        return self.input.text()
+
+    def set_value(self, value):
+        self.input.setText(str(value))
+
+    def set_editable(self, editable: bool):
+        self.input.setEnabled(editable)
+        self.browse_btn.setEnabled(editable)
+
+
+# ════════════════════════════════════════════════════════════════════
+#                  Folder List Row (لفولدرات النسخ الاحتياطي)
+# ════════════════════════════════════════════════════════════════════
+class FolderListRow(QWidget):
+    """
+    محرّر لليستة فولدرات — كل سطر فولدر، مع أزرار إضافة وحذف.
+    بيستخدم لفولدرات النسخ الاحتياطي لصور النتيجة.
+    """
+
+    kind = "folder_list"
+
+    def __init__(self, label, key, values, parent=None):
+        super().__init__(parent)
+        self.key = key
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 6, 0, 6)
+        layout.setSpacing(6)
+
+        top = QHBoxLayout()
+        top.setSpacing(8)
+        lbl = QLabel(label)
+        lbl.setStyleSheet("font-weight: 500;")
+        top.addWidget(lbl)
+        top.addStretch()
+
+        self.add_btn = QPushButton("➕  إضافة فولدر")
+        self.add_btn.setObjectName("SecondaryBtn")
+        self.add_btn.setEnabled(False)
+        self.add_btn.clicked.connect(self._on_add)
+        top.addWidget(self.add_btn)
+
+        self.remove_btn = QPushButton("🗑  حذف المحدد")
+        self.remove_btn.setObjectName("SecondaryBtn")
+        self.remove_btn.setEnabled(False)
+        self.remove_btn.clicked.connect(self._on_remove)
+        top.addWidget(self.remove_btn)
+        layout.addLayout(top)
+
+        self.list_widget = QListWidget()
+        self.list_widget.setObjectName("FilterEdit")
+        self.list_widget.setMaximumHeight(130)
+        self.list_widget.setEnabled(False)
+        for v in (values or []):
+            self.list_widget.addItem(str(v))
+        layout.addWidget(self.list_widget)
+
+        hint = QLabel("كل صورة نتيجة هتتنسخ نسخة إضافية في كل الفولدرات دي.")
+        hint.setStyleSheet("color: #94A3B8; font-size: 11px;")
+        hint.setWordWrap(True)
+        layout.addWidget(hint)
+
+    def _on_add(self):
+        folder = QFileDialog.getExistingDirectory(
+            self, "اختر فولدر نسخة احتياطية"
+        )
+        if not folder:
+            return
+        existing = {
+            self.list_widget.item(i).text()
+            for i in range(self.list_widget.count())
+        }
+        if folder in existing:
+            QMessageBox.information(self, "موجود", "الفولدر ده مضاف بالفعل.")
+            return
+        self.list_widget.addItem(folder)
+
+    def _on_remove(self):
+        for item in self.list_widget.selectedItems():
+            self.list_widget.takeItem(self.list_widget.row(item))
+
+    def value(self):
+        return [
+            self.list_widget.item(i).text()
+            for i in range(self.list_widget.count())
+        ]
+
+    def set_value(self, values):
+        self.list_widget.clear()
+        if isinstance(values, (list, tuple)):
+            for v in values:
+                self.list_widget.addItem(str(v))
+
+    def set_editable(self, editable: bool):
+        self.list_widget.setEnabled(editable)
+        self.add_btn.setEnabled(editable)
+        self.remove_btn.setEnabled(editable)
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -331,6 +476,17 @@ class SettingsPage(QWidget):
         ])
         layout.addWidget(files_card)
 
+        # ─── Result Images card ───
+        layout.addWidget(self._make_section_label("صور النتيجة (Result Images)"))
+        layout.addWidget(self._make_result_images_card())
+
+        # â”€â”€â”€ Test sequence card â”€â”€â”€
+        layout.addWidget(self._make_section_label("Test Sequence"))
+        sequence_card = self._make_card([
+            ("Vision test count", "vision_test_count", "int"),
+        ])
+        layout.addWidget(sequence_card)
+
         # ─── Intervals card ───
         layout.addWidget(self._make_section_label("الفترات الزمنية (Intervals — seconds)"))
         intervals_card = self._make_card([
@@ -423,7 +579,46 @@ class SettingsPage(QWidget):
 
         return card
 
-    def _track_row(self, row: FieldRow):
+    def _make_result_images_card(self):
+        """
+        كارت صور النتيجة:
+        - الفولدر الأساسي (FolderRow بزرار Browse)
+        - فولدرات النسخ الاحتياطي (FolderListRow)
+        كله للقراءة فقط لحد ما يتفتح Test Mode.
+        """
+        card = QFrame()
+        card.setObjectName("Card")
+        cl = QVBoxLayout(card)
+        cl.setContentsMargins(20, 14, 20, 14)
+        cl.setSpacing(6)
+
+        # الفولدر الأساسي
+        primary_row = FolderRow(
+            "فولدر صور النتيجة",
+            "result_images_folder",
+            config.get("result_images_folder", "result_images"),
+        )
+        self._track_row(primary_row)
+        cl.addWidget(primary_row)
+
+        # فاصل
+        sep = QFrame()
+        sep.setFrameShape(QFrame.HLine)
+        sep.setStyleSheet("color: #1E293B;")
+        cl.addWidget(sep)
+
+        # فولدرات النسخ الاحتياطي
+        backup_row = FolderListRow(
+            "فولدرات نسخ إضافية (Backup)",
+            "result_images_backup_folders",
+            config.get("result_images_backup_folders", []),
+        )
+        self._track_row(backup_row)
+        cl.addWidget(backup_row)
+
+        return card
+
+    def _track_row(self, row):
         if not hasattr(self, "_rows"): self._rows = []
         self._rows.append(row)
 

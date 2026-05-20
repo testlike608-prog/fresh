@@ -3,26 +3,89 @@ from openpyxl.styles import Font
 from pathlib import Path
 import pandas as pd
 import os
+import shutil
 from datetime import datetime
 
 import serial
 
 
-def get_image_path(image_name, folder_name="result_images"):
+def _base_dir():
+    """المجلد المرجعي اللي بنحسب منه المسارات النسبية."""
+    return Path(__file__).parent
+
+
+def _resolve_folder(folder):
     """
-    فانكشن بتاخد اسم الصورة واسم الفولدر وترجع الباث الكامل
+    تحوّل اسم/مسار فولدر لـ Path كامل.
+    - لو المسار مطلق (absolute) بيترجع زي ما هو.
+    - لو نسبي بيتحسب جنب ملف الكود.
     """
-    # تحديد مسار الفولدر الحالي اللي فيه ملف الكود
-    current_dir = Path(__file__).parent
-    
-    # دمج المسار مع الفولدر واسم الصورة
-    image_path = current_dir / folder_name / image_name
-    
+    p = Path(str(folder).strip())
+    if not p.is_absolute():
+        p = _base_dir() / p
+    return p
+
+
+def _get_images_folder():
+    """ترجع فولدر صور النتيجة من config (قابل للتعديل من الـ GUI)."""
+    folder = "result_images"
+    try:
+        from config import config as _cfg
+        folder = _cfg.get("result_images_folder", "result_images") or "result_images"
+    except Exception:
+        pass
+    return _resolve_folder(folder)
+
+
+def get_image_path(image_name, folder_name=None):
+    """
+    فانكشن بتاخد اسم الصورة وترجع الباث الكامل.
+    لو folder_name = None بتاخد الفولدر من config (قابل للتعديل من الـ GUI).
+    """
+    # تحديد مسار فولدر الصور
+    if folder_name is None:
+        base = _get_images_folder()
+    else:
+        base = _resolve_folder(folder_name)
+
+    # دمج المسار مع اسم الصورة
+    image_path = base / image_name
+
     # التأكد إذا كانت الصورة موجودة فعلاً (اختياري لكن مفيد)
     if image_path.exists():
         return str(image_path.resolve())
     else:
-        return f"خطأ: الصورة '{image_name}' غير موجودة في فولدر '{folder_name}'"
+        return f"خطأ: الصورة '{image_name}' غير موجودة في فولدر '{base}'"
+
+
+def _copy_result_images_to_backups(image_names):
+    """
+    ينسخ صور النتيجة من الفولدر الأساسي لكل فولدرات الـ backup
+    المحددة في config (result_images_backup_folders).
+    """
+    try:
+        from config import config as _cfg
+        backups = _cfg.get("result_images_backup_folders", []) or []
+    except Exception:
+        return
+
+    if not backups:
+        return
+
+    src_folder = _get_images_folder()
+    for folder in backups:
+        folder = str(folder).strip()
+        if not folder:
+            continue
+        dest = _resolve_folder(folder)
+        try:
+            dest.mkdir(parents=True, exist_ok=True)
+            for name in image_names:
+                src = src_folder / name
+                if src.exists():
+                    shutil.copy2(src, dest / name)
+        except Exception as e:
+            print(f"تعذّر نسخ صور النتيجة إلى '{dest}': {e}")
 """"
 # --- أمثلة للاستخدام ---
 
@@ -46,8 +109,15 @@ def result_reporting(ID, serial_num, result, file_path=None):
         except Exception:
             file_path = "results_report.xlsx"
     image_path = []
+    image_names = []
     for i in range(0, 4):  # لو حابب تضيف لحد 4 صور
-        image_path.append(get_image_path(f"{ID}_{i}.png"))
+        name = f"{ID}_{i}.png"
+        image_names.append(name)
+        image_path.append(get_image_path(name))
+
+    # نسخ صور النتيجة لفولدرات الـ backup الإضافية (لو محددة في config)
+    _copy_result_images_to_backups(image_names)
+
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     new_data = {

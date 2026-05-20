@@ -2,7 +2,10 @@ import socket
 import threading
 import time
 import queue
-import pyodbc
+try:
+    import pyodbc
+except ModuleNotFoundError:
+    pyodbc = None
 import os
 import re
 import textwrap
@@ -548,12 +551,12 @@ class AppStage:
     BARCODE_RECEIVED = "BARCODE_RECEIVED"   # وصلنا باركود جديد من الـ scanner
     PROGRAM_LOOKUP   = "PROGRAM_LOOKUP"     # بنبحث في program_mapping.xlsx
     SENDING_PROGRAM  = "SENDING_PROGRAM"    # بنبلّغ الكوبوت برقم البرنامج
-    VISION_TEST_1    = "VISION_TEST_1"      # اختبار 1/3
-    VISION_TEST_2    = "VISION_TEST_2"      # اختبار 2/3
-    VISION_TEST_3    = "VISION_TEST_3"      # اختبار 3/3
-    VISION_TEST_4    = "VISION_TEST_4"      # اختبار 4/4
-    VISION_TEST_5    = "VISION_TEST_5"      # اختبار 5/4
-    VISION_TEST_6    = "VISION_TEST_6"      # اختبار 6/4
+    VISION_TEST_1    = "VISION_TEST_1"      # اختبار 1/6
+    VISION_TEST_2    = "VISION_TEST_2"      # اختبار 2/6
+    VISION_TEST_3    = "VISION_TEST_3"      # اختبار 3/6
+    VISION_TEST_4    = "VISION_TEST_4"      # اختبار 4/6
+    VISION_TEST_5    = "VISION_TEST_5"      # اختبار 5/6
+    VISION_TEST_6    = "VISION_TEST_6"      # اختبار 6/6
 
     REPORTING        = "REPORTING"          # بنكتب في results_report.xlsx
     DONE             = "DONE"               # خلصنا الباركود ده
@@ -561,6 +564,15 @@ class AppStage:
 
     # عدد دورات اختبار الرؤية في كل برنامج
     VISION_TEST_COUNT = 6
+
+    @classmethod
+    def get_vision_test_count(cls):
+        try:
+            from config import config as _cfg
+            count = int(_cfg.get("vision_test_count", cls.VISION_TEST_COUNT))
+        except Exception:
+            count = cls.VISION_TEST_COUNT
+        return max(1, min(cls.VISION_TEST_COUNT, count))
 
     # ترتيب المراحل عشان الـ progress bar
     ORDER = [
@@ -573,12 +585,12 @@ class AppStage:
         BARCODE_RECEIVED: "تم استقبال باركود",
         PROGRAM_LOOKUP:   "البحث عن البرنامج",
         SENDING_PROGRAM:  "إرسال البرنامج للكوبوت",
-        VISION_TEST_1:    "اختبار الرؤية 1/4",
-        VISION_TEST_2:    "اختبار الرؤية 2/4",
-        VISION_TEST_3:    "اختبار الرؤية 3/4",
-        VISION_TEST_4:    "اختبار الرؤية 4/4",
-        VISION_TEST_5:    "اختبار الرؤية 5/4",
-        VISION_TEST_6:    "اختبار الرؤية 6/4",
+        VISION_TEST_1:    "اختبار الرؤية 1/6",
+        VISION_TEST_2:    "اختبار الرؤية 2/6",
+        VISION_TEST_3:    "اختبار الرؤية 3/6",
+        VISION_TEST_4:    "اختبار الرؤية 4/6",
+        VISION_TEST_5:    "اختبار الرؤية 5/6",
+        VISION_TEST_6:    "اختبار الرؤية 6/6",
         REPORTING:        "كتابة التقرير",
         DONE:             "انتهى",
         ERROR:            "خطأ",
@@ -626,7 +638,7 @@ class App():
         self.current_stage = AppStage.IDLE
         self.current_barcode = None
         self.current_program = None
-        self.current_step = 0     # 0, 1, 2, 3 (لـ vision tests)
+        self.current_step = 0     # رقم خطوة اختبار الرؤية الحالية
         self.last_event_time = time.time()
         self.start_time = time.time()
         self.stats = {
@@ -660,6 +672,7 @@ class App():
                 "barcode":         self.current_barcode,
                 "program":         self.current_program,
                 "step":            self.current_step,
+                "vision_test_count": AppStage.get_vision_test_count(),
                 "last_event_time": self.last_event_time,
                 "uptime":          time.time() - self.start_time,
                 "stats":           dict(self.stats),
@@ -794,11 +807,12 @@ class App():
         }
 
         list_of_results = []
-        # 6 دورات اختبار: نبعت ID للفيجن + trigger + نستلم النتيجه + نبلّغ الكوبوت
-        for i in range(AppStage.VISION_TEST_COUNT):  # = 6
+        vision_test_count = AppStage.get_vision_test_count()
+        # دورات اختبار الرؤية: نبعت ID للفيجن + trigger + نستلم النتيجه + نبلّغ الكوبوت
+        for i in range(vision_test_count):
             self._set_stage(stage_map[i], current_step=i + 1)
-            x = 11 + i   # 11, 12, 13, 14 — قيم الـ trigger
-            y = 21 + i   # 21, 22, 23, 24 — إشارات بين الاختبارات للكوبوت
+            x = 11 + i   # 11..16 — قيم الـ trigger
+            y = 21 + i   # 21..26 — إشارات بين الاختبارات للكوبوت
             self.VisionClient_ID.send_only(f"{barcode}_{i}")
             raw_result = self.VisionClient_TRIG.send_request(x)
             # ── BUG FIX ─────────────────────────────────────────────
@@ -809,7 +823,7 @@ class App():
             parsed = self._parse_vision_response(raw_result)
             self.cobotClient._log_add(
                 "INFO",
-                f"Vision test {i+1}/{AppStage.VISION_TEST_COUNT}: raw={raw_result!r} parsed={parsed}",
+                f"Vision test {i+1}/{vision_test_count}: raw={raw_result!r} parsed={parsed}",
             )
             list_of_results.append(parsed)
             self.cobotClient.send_request(y)

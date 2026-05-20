@@ -1,8 +1,8 @@
 {
   "_meta": {
     "version": "1.0",
-    "created_at": "2026-05-18T10:58:27.815977",
-    "modified_at": "2026-05-19T07:32:43.032997"
+    "created_at": "",
+    "modified_at": "2026-05-20T11:11:07.753909"
   },
   "password_hash": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
   "vision_trig_ip": "127.0.0.1",
@@ -12,9 +12,12 @@
   "cobot_ip": "192.168.57.2",
   "cobot_port": 9000,
   "trigger_server_ip": "0.0.0.0",
-  "trigger_server_port": 41477,
+  "trigger_server_port": 5000,
   "program_mapping_file": "program_mapping.xlsx",
   "results_report_file": "results_report.xlsx",
+  "vision_test_count": 6,
+  "result_images_folder": "result_images",
+  "result_images_backup_folders": [],
   "watchdog_interval": 2.0,
   "reconnect_check_interval": 3.0,
   "reconnect_retry_delay": 5.0,
