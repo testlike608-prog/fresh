@@ -1,3 +1,4 @@
+from cmath import log
 import socket
 import threading
 import time
@@ -18,7 +19,6 @@ from openpyxl.styles import Font
 import scanner as sc
 import excel as ex
 from thread_logger import LoggedThread, get_logger as _get_thread_logger
-import pandas as pd
 
 
 def _to_bytes(message, is_hex=False):
@@ -51,8 +51,9 @@ class TCPServer:
         self.server_sock = None
         self.running = False
         
-        # إدارة الكلاينت المتصلين
-        self.clients = [] # قائمة لتخزين السوكيتس الخاصة بالكلاينتس
+        # إدارة الكلاينت المتصلين — مع قفل لمنع race condition بين accept/handle/stop
+        self.clients = []
+        self._clients_lock = threading.Lock()
         self._log_lock = threading.Lock()
         self._log_seq = 0
         self._log = list()
@@ -113,7 +114,8 @@ class TCPServer:
                     daemon=True,
                 )
                 client_handler.start()
-                self.clients.append(client_sock)
+                with self._clients_lock:
+                    self.clients.append(client_sock)
                 
             except Exception as e:
                 if self.running:
@@ -154,18 +156,21 @@ class TCPServer:
         
         # لما اللوب يخلص (الكلاينت يقفل)، ننظف السوكيت
         client_sock.close()
-        if client_sock in self.clients:
-            self.clients.remove(client_sock)
+        with self._clients_lock:
+            if client_sock in self.clients:
+                self.clients.remove(client_sock)
         self._log_add("INFO", f"Connection closed for {addr}")  
     
     def broadcast(self, message, is_hex=False):
         """إرسال رسالة لكل الكلاينتس المتصلين حالياً"""
         data_to_send = self._prepare_data(message, is_hex)
-        for client in self.clients:
+        with self._clients_lock:
+            clients_snapshot = list(self.clients)
+        for client in clients_snapshot:
             try:
                 client.sendall(data_to_send)
-            except:
-                pass # هنا السوكيت غالباً ميت، الـ handle_client هينظفه
+            except Exception:
+                pass  # السوكيت غالباً ميت، الـ handle_client هينظفه
 
     def _prepare_data(self, message, is_hex):
         return _to_bytes(message, is_hex)
@@ -173,10 +178,18 @@ class TCPServer:
     def stop(self):
         """إيقاف السيرفر تماماً"""
         self.running = False
-        for client in self.clients:
-            client.close()
+        with self._clients_lock:
+            clients_snapshot = list(self.clients)
+        for client in clients_snapshot:
+            try:
+                client.close()
+            except Exception:
+                pass
         if self.server_sock:
-            self.server_sock.close()
+            try:
+                self.server_sock.close()
+            except Exception:
+                pass
         self._log_add("INFO", "Server stopped.")
 
     def _log_add(self, level: str, msg: str):
@@ -350,18 +363,27 @@ class  TCPClient():
         log.info(f"Connection watchdog stopped for {self.name}")
     
     def _get_sock(self):
-         
-        local_ip, local_port = self.sock.getsockname()
-        return local_ip,local_port
+        """يرجع (local_ip, local_port) أو (None, None) لو مش متصل."""
+        if self.sock is None:
+            return None, None
+        try:
+            return self.sock.getsockname()
+        except Exception:
+            return None, None
    
-    def send_request(self, message , is_hex=False):
+    # رسائل الـ keepalive اللي بنتجاهلها في send_request
+    # الكوبوت بيبعتها تلقائياً على الـ socket كـ heartbeat
+    _KEEPALIVE_MSGS = {b"ping", b"pong", b"PING", b"PONG"}
+
+    def send_request(self, message, is_hex=False):
         """
-        إرسال واستقبال فقط (بدون إغلاق الاتصال)
+        إرسال واستقبال فقط (بدون إغلاق الاتصال).
+        بيتجاهل رسائل الـ keepalive (ping/pong) اللي بيبعتها الكوبوت
+        تلقائياً على الـ socket ويفضل مستني الرد الحقيقي.
         """
         if not self.connected or self.sock is None:
             print(f"[{self.ip}]:[{self.port}] Error: Not connected! Trying to connect...")
             self.ensure_connected()
-           
 
         try:
             # 1. تجهيز الرسالة (بيتعامل مع int/str/bytes/float عبر _to_bytes)
@@ -370,33 +392,29 @@ class  TCPClient():
             # 2. الإرسال
             self.sock.sendall(data_to_send)
 
-            # 3. الاستقبال (هنا هيفضل مستني لحد ما السيرفر يرد)
-            # طالما timeout=None أو وقت كبير، هيفضل واقف هنا (Blocking)
-            response = self.sock.recv(self.buffer_size)
+            # 3. الاستقبال — بنتجاهل keepalive ونفضل مستنيين الرد الحقيقي
+            while True:
+                response = self.sock.recv(self.buffer_size)
+                # لو الرد رسالة keepalive → تجاهلها وارجع اسمع تاني
+                if response and response.strip() in self._KEEPALIVE_MSGS:
+                    print(f"[{self.ip}]:[{self.port}] Ignoring keepalive: {response!r}")
+                    continue
+                return response
 
-            return  response
-
-        except (socket.timeout):
+        except socket.timeout:
             print(f"[{self.ip}]:[{self.port}] Timeout: Server took too long to respond.")
             return None
 
         except (OSError, BrokenPipeError, ConnectionResetError, socket.error) as e:
-            # ⚠️ هنا أهم تعديل: لو حصل أي خطأ في السوكيت (السيرفر قفل أو السلك اتشال)
             print(f"[{self.ip}]:[{self.port}] Connection Lost ({e}). Reconnecting...")
-            
             self.connected = False
             if self.sock:
                 try:
                     self.sock.close()
-                except:
+                except Exception:
                     pass
                 self.sock = None
-            
-            # محاولة إعادة الاتصال فوراً
             self.ensure_connected()
-            
-            # اختياري: ممكن تخليها تحاول تبعت الرسالة تاني بعد ما رجع الاتصال
-            # return self.send_request(message, is_hex) 
             return None
 
         except Exception as e:
@@ -544,84 +562,115 @@ class  TCPClient():
 ##################################################################
 class AppStage:
     """
-    المراحل اللي ممكن البرنامج يكون فيها — قراءتها بتقول لك إنت واقف فين.
-    الـ GUI بيستخدمها يعرض الشكل والـ progress.
+    المراحل اللي ممكن البرنامج يكون فيها.
+    يدعم حتى MAX_VISION_TESTS اختبار ديناميكياً بدون تعديل الكود.
     """
-    IDLE             = "IDLE"               # مفيش حاجه شغّاله — بنستنى باركود
-    BARCODE_RECEIVED = "BARCODE_RECEIVED"   # وصلنا باركود جديد من الـ scanner
-    PROGRAM_LOOKUP   = "PROGRAM_LOOKUP"     # بنبحث في program_mapping.xlsx
-    SENDING_PROGRAM  = "SENDING_PROGRAM"    # بنبلّغ الكوبوت برقم البرنامج
-    VISION_TEST_1    = "VISION_TEST_1"      # اختبار 1/6
-    VISION_TEST_2    = "VISION_TEST_2"      # اختبار 2/6
-    VISION_TEST_3    = "VISION_TEST_3"      # اختبار 3/6
-    VISION_TEST_4    = "VISION_TEST_4"      # اختبار 4/6
-    VISION_TEST_5    = "VISION_TEST_5"      # اختبار 5/6
-    VISION_TEST_6    = "VISION_TEST_6"      # اختبار 6/6
+    # ─── الحد الأقصى لعدد الاختبارات ────────────────────────────────
+    MAX_VISION_TESTS = 30   # ← غيّر الرقم ده لو عايز أكتر أو أقل
 
-    REPORTING        = "REPORTING"          # بنكتب في results_report.xlsx
-    DONE             = "DONE"               # خلصنا الباركود ده
-    ERROR            = "ERROR"              # حصل غلط
+    # ─── الـ stages الثابتة ──────────────────────────────────────────
+    IDLE             = "IDLE"
+    BARCODE_RECEIVED = "BARCODE_RECEIVED"
+    PROGRAM_LOOKUP   = "PROGRAM_LOOKUP"
+    SENDING_PROGRAM  = "SENDING_PROGRAM"
+    REPORTING        = "REPORTING"
+    DONE             = "DONE"
+    ERROR            = "ERROR"
 
-    # عدد دورات اختبار الرؤية في كل برنامج
-    VISION_TEST_COUNT = 6
+    # ─── الـ vision stages ديناميكية (VISION_TEST_1 .. VISION_TEST_30) ──
+    # بيتولدوا تلقائياً حسب MAX_VISION_TESTS
+    @classmethod
+    def vision_stage(cls, i: int) -> str:
+        """يرجع اسم الـ stage للاختبار i (0-indexed). مثال: i=0 → 'VISION_TEST_1'"""
+        return f"VISION_TEST_{i + 1}"
+
+    # ─── عدد الاختبارات الافتراضي ────────────────────────────────────
+    VISION_TEST_COUNT = 6   # القيمة الافتراضية لو مش موجودة في config
 
     @classmethod
-    def get_vision_test_count(cls):
+    def get_vision_test_count(cls) -> int:
+        """يجيب عدد الاختبارات من config (1 .. MAX_VISION_TESTS)."""
         try:
             from config import config as _cfg
             count = int(_cfg.get("vision_test_count", cls.VISION_TEST_COUNT))
         except Exception:
             count = cls.VISION_TEST_COUNT
-        return max(1, min(cls.VISION_TEST_COUNT, count))
+        return max(1, min(cls.MAX_VISION_TESTS, count))
 
-    # ترتيب المراحل عشان الـ progress bar
-    ORDER = [
-        IDLE, BARCODE_RECEIVED, PROGRAM_LOOKUP, SENDING_PROGRAM,
-        VISION_TEST_1, VISION_TEST_2, VISION_TEST_3, VISION_TEST_4, VISION_TEST_5, VISION_TEST_6, REPORTING, DONE,
-    ]
+    # ─── ORDER: الترتيب للـ progress bar (يتولد ديناميكياً) ─────────
+    @classmethod
+    def get_order(cls) -> list:
+        vision_stages = [cls.vision_stage(i) for i in range(cls.MAX_VISION_TESTS)]
+        return [
+            cls.IDLE, cls.BARCODE_RECEIVED, cls.PROGRAM_LOOKUP, cls.SENDING_PROGRAM,
+            *vision_stages,
+            cls.REPORTING, cls.DONE,
+        ]
 
+    # ORDER ثابت بيستخدمه الكود القديم اللي بيقرأ AppStage.ORDER مباشرة
+    ORDER = (
+        ["IDLE", "BARCODE_RECEIVED", "PROGRAM_LOOKUP", "SENDING_PROGRAM"]
+        + [f"VISION_TEST_{i}" for i in range(1, MAX_VISION_TESTS + 1)]
+        + ["REPORTING", "DONE"]
+    )
+
+    # ─── LABELS: النصوص للـ GUI ────────────────────────────────────
     LABELS = {
-        IDLE:             "في الانتظار",
-        BARCODE_RECEIVED: "تم استقبال باركود",
-        PROGRAM_LOOKUP:   "البحث عن البرنامج",
-        SENDING_PROGRAM:  "إرسال البرنامج للكوبوت",
-        VISION_TEST_1:    "اختبار الرؤية 1/6",
-        VISION_TEST_2:    "اختبار الرؤية 2/6",
-        VISION_TEST_3:    "اختبار الرؤية 3/6",
-        VISION_TEST_4:    "اختبار الرؤية 4/6",
-        VISION_TEST_5:    "اختبار الرؤية 5/6",
-        VISION_TEST_6:    "اختبار الرؤية 6/6",
-        REPORTING:        "كتابة التقرير",
-        DONE:             "انتهى",
-        ERROR:            "خطأ",
+        "IDLE":             "في الانتظار",
+        "BARCODE_RECEIVED": "تم استقبال باركود",
+        "PROGRAM_LOOKUP":   "البحث عن البرنامج",
+        "SENDING_PROGRAM":  "إرسال البرنامج للكوبوت",
+        **{f"VISION_TEST_{i}": f"اختبار الرؤية {i}" for i in range(1, MAX_VISION_TESTS + 1)},
+        "REPORTING":        "كتابة التقرير",
+        "DONE":             "انتهى",
+        "ERROR":            "خطأ",
     }
+
+    # backward-compat: attributes for old code using AppStage.VISION_TEST_1 etc.
+    # يتولدوا تلقائياً في آخر الكلاس
+
+
+# نضيف الـ attributes ديناميكياً على الـ class عشان الكود القديم يشتغل
+for _i in range(1, AppStage.MAX_VISION_TESTS + 1):
+    setattr(AppStage, f"VISION_TEST_{_i}", f"VISION_TEST_{_i}")
 
 
 class App():
     def __init__(self):
 
         self.vision_queue = queue.Queue()
-        self.report_queue = queue.Queue()
+        # LOGIC-3 FIX: أزلنا report_queue لأنها كانت بتتملى ومفيش حاجة بتقرأها
         # علم لإيقاف العامل (sequance worker) عند الخروج
         self._stop_app = threading.Event()
+
+        # PERF-1 FIX: cache لملف mapping عشان منقراش Excel في كل scan
+        self._mapping_cache_df   = None
+        self._mapping_cache_path = None
+        self._mapping_cache_mtime = 0.0
 
         # ── الـ IPs/Ports جايين من config (قابلين للتعديل من الـ GUI) ────
         # ملحوظه: __init__ بس بيبني الـ objects. مفيش حاجه بتتصل ولا server بيقوم
         # لحد ما يتنده start(). ده عشان الـ GUI تكون كاملة قبل البدء.
         from config import config as _cfg
 
+        # SEC-3 FIX: timeout=30s يمنع blocking forever لو السيرفر صامت
+        _tcp_timeout = 30.0
+
         self.VisionClient_TRIG = TCPClient(
             _cfg.get("vision_trig_ip"), _cfg.get("vision_trig_port"),
+            timeout=_tcp_timeout,
             buffer_size=_cfg.get("tcp_buffer_size", 4096),
             name="VisionClient_TRIG",
         )
         self.VisionClient_ID = TCPClient(
             _cfg.get("vision_id_ip"), _cfg.get("vision_id_port"),
+            timeout=_tcp_timeout,
             buffer_size=_cfg.get("tcp_buffer_size", 4096),
             name="VisionClient_ID",
         )
         self.cobotClient = TCPClient(
             _cfg.get("cobot_ip"), _cfg.get("cobot_port"),
+            timeout=_tcp_timeout,
             buffer_size=_cfg.get("tcp_buffer_size", 4096),
             name="cobotClient",
         )
@@ -678,7 +727,6 @@ class App():
                 "stats":           dict(self.stats),
                 "queue_sizes": {
                     "vision_queue":  self.vision_queue.qsize(),
-                    "report_queue":  self.report_queue.qsize(),
                     "scanner_queue": sc.queue_barcode.qsize(),
                 },
                 "connections": {
@@ -707,7 +755,6 @@ class App():
 
             try:
                 self.vision_queue.put(barcode)
-                self.report_queue.put(barcode)
                 log.info(f"Barcode received and put in vision_queue: {barcode}")
             finally:
                 sc.queue_barcode.task_done()
@@ -723,9 +770,13 @@ class App():
         if match:
             serial_part = match.group(1)
             return serial_part
-        # الطريقة الثانية: إذا كان طول الكود ثابتاً دائماً في ماكينات Beko， يمكنك استخدام الـ Slicing مباشرة
-        # return barcode_text[6:13]
-        return None
+        # LOGIC-2 FIX: بدل ما نرجع None (بيتكتب كـ "None" في Excel)
+        # نرجع الباركود كامل كـ fallback
+        self.cobotClient._log_add(
+            "WARNING",
+            f"Could not extract serial from {barcode!r} — using full barcode as serial"
+        )
+        return barcode
 
 
     def determine_program_from_barcode(self, barcode, excel_file_path=None):
@@ -734,17 +785,35 @@ class App():
             from config import config as _cfg
             excel_file_path = _cfg.get("program_mapping_file", "program_mapping.xlsx")
         self.cobotClient._log_add("INFO", f"Determining program for barcode: {barcode}")
+
+        # LOGIC-1 FIX: تحقق من طول الباركود قبل الوصول لـ [-3]
+        if not barcode or len(barcode) < 3:
+            self.cobotClient._log_add("WARNING", f"Barcode too short (<3 chars): {barcode!r}")
+            return "خطأ: الباركود قصير جداً"
+
         target_char = barcode[-3]
         self.cobotClient._log_add("INFO", f"Target character for barcode {barcode}: {target_char}")
 
         try:
-            # 1. قراءة ملف الإكسل بالكامل في ثانية واحدة
-            # نفترض أن العمود الأول اسمه 'Character' والعمود الثاني اسمه 'Program'
-            # لو ما عندكش أسماء أعمدة (Headers)، قولي عشان نعدلها برقم العمود
-            df = pd.read_excel(excel_file_path)
-            
-            # تأكد من أسماء الأعمدة في ملفك، هنا فرضنا أن العمود الأول هو index 0 والثاني index 1
-            char_column = df.columns[0]
+            # PERF-1 FIX: نقرأ الملف بس لو اتغير (cache by mtime)
+            import os as _os
+            try:
+                current_mtime = _os.path.getmtime(excel_file_path)
+            except OSError:
+                current_mtime = 0.0
+
+            if (self._mapping_cache_df is None
+                    or self._mapping_cache_path != excel_file_path
+                    or self._mapping_cache_mtime != current_mtime):
+                self.cobotClient._log_add("INFO", f"Loading mapping file: {excel_file_path}")
+                self._mapping_cache_df    = pd.read_excel(excel_file_path)
+                self._mapping_cache_path  = excel_file_path
+                self._mapping_cache_mtime = current_mtime
+            else:
+                self.cobotClient._log_add("INFO", "Using cached mapping (file unchanged)")
+
+            df = self._mapping_cache_df
+            char_column  = df.columns[0]
             value_column = df.columns[1]
 
             # 2. البحث المباشر بدون loops
@@ -783,6 +852,37 @@ class App():
             self.cobotClient._log_add("ERROR", f"sequance_handler callback failed: {e}")
 
     # ─── العامل الحقيقي اللي بيشغل برامج الفحص ─────────────────────────
+    @staticmethod
+    def _flush_socket(client, label="", drain_ms=200):
+        """
+        يفرّغ أي بيانات متبقية في بافر الـ socket (stale data من السيكوانس السابقة).
+        بيحوّل السوكيت لـ non-blocking لفترة قصيرة عشان يقرأ كل حاجة فاضلة.
+        """
+        log = _get_thread_logger()
+        if not client.connected or client.sock is None:
+            return
+        old_timeout = client.sock.gettimeout()
+        flushed = 0
+        try:
+            client.sock.settimeout(drain_ms / 1000.0)
+            while True:
+                chunk = client.sock.recv(4096)
+                if not chunk:
+                    break
+                flushed += len(chunk)
+                log.debug(f"[FLUSH] {label}: discarded {len(chunk)}B stale data: {chunk!r}")
+        except socket.timeout:
+            pass  # بافر فاضي
+        except Exception as e:
+            log.debug(f"[FLUSH] {label}: {e}")
+        finally:
+            try:
+                client.sock.settimeout(old_timeout)
+            except Exception:
+                pass
+        if flushed:
+            log.warning(f"[FLUSH] {label}: flushed {flushed}B stale data — possible protocol drift!")
+
     def _run_test_program(self, program, barcode):
         """
         ينفّذ تتابع فحص واحد (المنطق المشترك بين برامج 1-5).
@@ -790,49 +890,52 @@ class App():
 
         :return: "pass" أو "fail"
         """
+        log = _get_thread_logger()
         program = int(program)
+
+        # ── تنظيف بافرات السوكيت من أي بيانات متبقية من السيكوانس السابقة ──
+        # ده بيمنع قراءة ردود قديمة (stale) بدل ردود جديدة وده السبب الرئيسي
+        # إن البرنامج بيوقف في النص في السيكوانس التانية
+        self._flush_socket(self.cobotClient,        "cobot")
+        self._flush_socket(self.VisionClient_TRIG,  "TRIG")
 
         # 1. إرسال رقم البرنامج للكوبوت
         self._set_stage(AppStage.SENDING_PROGRAM, current_program=program)
-        
+        log.info(f"[SEQ] → cobot: send program={program}")
         self.cobotClient.send_request(program)
-
-        stage_map = {
-            0: AppStage.VISION_TEST_1,
-            1: AppStage.VISION_TEST_2,
-            2: AppStage.VISION_TEST_3,
-            3: AppStage.VISION_TEST_4,
-            4: AppStage.VISION_TEST_5,
-            5: AppStage.VISION_TEST_6,
-        }
+        log.info(f"[SEQ] ← cobot: ack program={program}")
 
         list_of_results = []
         vision_test_count = AppStage.get_vision_test_count()
-        # دورات اختبار الرؤية: نبعت ID للفيجن + trigger + نستلم النتيجه + نبلّغ الكوبوت
-        for i in range(vision_test_count):
-            self._set_stage(stage_map[i], current_step=i + 1)
-            x = 11 + i   # 11..16 — قيم الـ trigger
-            y = 21 + i   # 21..26 — إشارات بين الاختبارات للكوبوت
-            self.VisionClient_ID.send_only(f"{barcode}_{i}")
-            raw_result = self.VisionClient_TRIG.send_request(x)
-            # ── BUG FIX ─────────────────────────────────────────────
-            # send_request بيرجع bytes (زي b"0" أو b"1")، مش int. لو سيبناها
-            # bytes الـ check `0 in list_of_results` هيدور على integer 0 ومش
-            # هيلاقيه أبدًا في list of bytes → كل حاجه بتطلع pass غلط!
-            # هنا بنحوّل الرد لـ int بشكل آمن.
-            parsed = self._parse_vision_response(raw_result)
-            self.cobotClient._log_add(
-                "INFO",
-                f"Vision test {i+1}/{vision_test_count}: raw={raw_result!r} parsed={parsed}",
-            )
-            list_of_results.append(parsed)
-            self.cobotClient.send_request(y)
 
-        # لو فيه أي 0 (أو None للأخطاء) → fail
-        # 0 = fail من الفيجن
-        # None = timeout أو error في الاتصال — نعتبره fail برضو لأمان
+        for i in range(vision_test_count):
+            self._set_stage(AppStage.vision_stage(i), current_step=i + 1)
+            x = 11 + i   # 11..16 — trigger للـ Vision TRIG
+            y = 21 + i   # 21..26 — إشارة بين الاختبارات للكوبوت
+            log.info(f"[SEQ] Test {i+1}/{vision_test_count}: → cobot: send_request({y}), waiting...")
+            cobot_step_ack = self.cobotClient.send_request(y)
+            log.info(f"[SEQ] Test {i+1}/{vision_test_count}: ← cobot: ack({y}) = {cobot_step_ack!r}")
+            
+            log.info(f"[SEQ] Test {i+1}/{vision_test_count}: → VisionID: send_only({barcode}_{i})")
+            self.VisionClient_ID.send_only(f"{barcode}_{i}")
+
+            log.info(f"[SEQ] Test {i+1}/{vision_test_count}: → VisionTRIG: send_request({x}), waiting...")
+            raw_result = self.VisionClient_TRIG.send_request(x)
+            parsed = self._parse_vision_response(raw_result)
+            log.info(f"[SEQ] Test {i+1}/{vision_test_count}: ← VisionTRIG: raw={raw_result!r}  parsed={parsed}")
+
+            list_of_results.append(parsed)
+
+            
+
+        # لو فيه أي 0 أو None → fail
         final_result = "fail" if any(r == 0 or r is None for r in list_of_results) else "pass"
-        self.cobotClient.send_only(0 if final_result == "fail" else 1)
+        final_code   = 0 if final_result == "fail" else 1
+
+        log.info(f"[SEQ] results={list_of_results}  →  final={final_result}({final_code})")
+        log.info(f"[SEQ] → cobot: send_only({final_code}) [final result]")
+        self.cobotClient.send_only(final_code)
+        log.info(f"[SEQ] Sequence complete.")
 
         return final_result
 
@@ -958,26 +1061,56 @@ class App():
             for client in (self.VisionClient_TRIG, self.VisionClient_ID, self.cobotClient):
                 client._stop_monitor.clear()
 
-            # 1. نشغّل الـ scanner listener — لازم يكون قبل أي حاجه عشان نلتقط
-            #    الباركودات بمجرد ما المستخدم يدوس Start. مفيش keyboard hook قبل ذلك.
+            # 1. نشغّل مصدر الباركود (كيبورد أو كاميرا) حسب scan_mode في config
+            from config import config as _cfg
+            _scan_mode = _cfg.get("scan_mode", "manual")
+
+            # ── camera_hub: نفتح الكاميرا مرة واحدة بس لكل المستهلكين ──
             try:
-                sc.start_listener()
-                log.info("Scanner listener started")
-            except Exception as e:
-                log.warning(f"Scanner listener could not start: {e}")
+                import camera_hub
+                _cam_idx = int(_cfg.get("live_camera_index",
+                               _cfg.get("camera_index", 1)))
+                camera_hub.start(camera_index=_cam_idx)
+                log.info(f"camera_hub: started (camera {_cam_idx})")
+            except Exception as _hub_err:
+                log.warning(f"camera_hub.start failed: {_hub_err}")
+
+            if _scan_mode == "camera":
+                try:
+                    import camera_barcode
+                    camera_barcode.start()   # يقرأ من camera_hub، مش camera_index مباشرة
+                    log.info("Camera barcode scanner started (via camera_hub)")
+                except Exception as e:
+                    log.warning(f"Camera scanner could not start: {e} — falling back to keyboard")
+                    try:
+                        sc.start_listener()
+                        log.info("Scanner listener started (keyboard fallback)")
+                    except Exception as e2:
+                        log.warning(f"Scanner listener also failed: {e2}")
+            else:
+                try:
+                    sc.start_listener()
+                    log.info("Scanner listener started (keyboard mode)")
+                except Exception as e:
+                    log.warning(f"Scanner listener could not start: {e}")
 
             # 2. نشغّل الـ TCP server
             if not self.triggerserver.start():
                 log.error("App.start() failed: TCPServer.start() returned False")
                 # نوقف الـ scanner اللي بدأناه
-                try: sc.stop_listener()
-                except Exception: pass
+                try:
+                    sc.stop_listener()
+                except Exception:
+                    pass
                 return False
             self.triggerserver.start_listening(self.sequance_handler)
 
             self.VisionClient_TRIG.start_reconnection_watchdog()
             self.VisionClient_ID.start_reconnection_watchdog()
             self.cobotClient.start_reconnection_watchdog()
+            #self.VisionClient_TRIG.connect()
+            #self.VisionClient_ID.connect()
+            #self.cobotClient.connect()
 
             LoggedThread(
                 target=self.get_barcode_from_scanner,
@@ -985,11 +1118,20 @@ class App():
                 daemon=True,
             ).start()
 
-            LoggedThread(
+            self._sequance_worker_thread = LoggedThread(
                 target=self._sequance_worker,
                 name="App-sequance-worker",
                 daemon=True,
-            ).start()
+            )
+            self._sequance_worker_thread.start()
+
+            # ── live_image: يحفظ الفريمات من camera_hub ────────────────
+            try:
+                import live_image
+                live_image.start()
+                log.info("live_image: started (reads from camera_hub)")
+            except Exception as _li_err:
+                log.warning(f"live_image.start failed: {_li_err}")
 
             self.is_running = True
             self.start_time = time.time()
@@ -1003,17 +1145,54 @@ class App():
         return self.start()
 
     def stop(self):
-        """إيقاف البرنامج بشكل نضيف. قابل للتشغيل تاني بـ start()."""
+        """
+        إيقاف البرنامج بشكل نضيف — non-blocking للـ GUI thread.
+
+        الـ stop بيتم في ثريد خلفي عشان الـ GUI ما تتجمدش:
+        1. نشير للـ threads إنها توقف (_stop_app)
+        2. ننتظر السيكوانس تخلص (في الخلفية) عشان الكوبوت ياخد النتيجة الصح
+        3. نقفل الـ connections بعد ما كل حاجة تخلص
+        """
         log = _get_thread_logger()
         with self._start_stop_lock:
             if not self.is_running:
                 log.warning("App.stop() called but not running")
                 return
-
             log.info("App: STOPPING...")
             self._stop_app.set()
+            self.is_running = False   # نحجب start() جديدة فوراً
+            self._set_stage(AppStage.IDLE, current_step=0,
+                            current_barcode=None, current_program=None)
 
-            # نوقف الـ scanner listener (keyboard hook)
+        # ── الإغلاق الحقيقي في ثريد خلفي عشان GUI ما تتجمدش ──────────────
+        def _shutdown_worker():
+            # انتظر السيكوانس الحالية تخلص (max 120s) قبل ما نقفل الـ connections
+            seq_thread = getattr(self, "_sequance_worker_thread", None)
+            if seq_thread is not None and seq_thread.is_alive():
+                log.info("App: waiting for current sequence to finish (max 120s)...")
+                seq_thread.join(timeout=120)
+                if seq_thread.is_alive():
+                    log.warning("App: sequence timeout — forcing disconnect now")
+                else:
+                    log.info("App: sequence finished cleanly")
+
+            # نوقف مصدر الباركود
+            from config import config as _cfg_stop
+            if _cfg_stop.get("scan_mode", "manual") == "camera":
+                try:
+                    import camera_barcode
+                    camera_barcode.stop()
+                    log.info("Camera barcode scanner stopped")
+                except Exception as e:
+                    log.warning(f"camera_barcode.stop failed: {e}")
+            # ── وقف الكاميرا المباشرة ─────────────────────────────────────
+            try:
+                import live_image
+                live_image.stop()
+                log.info("live_image: stopped")
+            except Exception as e:
+                log.warning(f"live_image.stop failed: {e}")
+
             try:
                 sc.stop_listener()
                 log.info("Scanner listener stopped")
@@ -1030,7 +1209,14 @@ class App():
             except Exception as e:
                 log.warning(f"server.stop failed: {e}")
 
-            self.is_running = False
-            self._set_stage(AppStage.IDLE, current_step=0,
-                            current_barcode=None, current_program=None)
+            # ── camera_hub: آخر حاجة تتوقف (بعد camera_barcode و live_image) ──
+            try:
+                import camera_hub
+                camera_hub.stop()
+                log.info("camera_hub: stopped")
+            except Exception as e:
+                log.warning(f"camera_hub.stop failed: {e}")
+
             log.info("App: STOPPED")
+
+        LoggedThread(target=_shutdown_worker, name="App-shutdown", daemon=True).start()

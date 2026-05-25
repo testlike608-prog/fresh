@@ -35,6 +35,7 @@ from PySide6.QtWidgets import (
 import gui_styles
 from gui_log_bridge import QtLogEmitter, install_qt_handler
 from gui_settings import SettingsPage as TestModeSettingsPage
+from config import config
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -406,17 +407,33 @@ class StatusPage(QWidget):
         conn_grid = QGridLayout()
         conn_grid.setSpacing(12)
         self.conn_cards = {}
+
+        # الـ mapping بين كل card key والـ config keys بتاعت الـ IP والـ Port
+        self._card_config_keys = {
+            "VisionClient_TRIG": ("vision_trig_ip",    "vision_trig_port"),
+            "VisionClient_ID":   ("vision_id_ip",      "vision_id_port"),
+            "cobotClient":       ("cobot_ip",          "cobot_port"),
+            "triggerserver":     ("trigger_server_ip", "trigger_server_port"),
+        }
+
         cards_info = [
-            ("VisionClient_TRIG",    "Vision (Trigger)",   "127.0.0.1", 8081),
-            ("VisionClient_ID",      "Vision (ID)",        "127.0.0.1", 8080),
-            ("cobotClient",          "Cobot",              "192.168.57.2", 9000),
-            ("triggerserver",        "Trigger Server",     "0.0.0.0", 5000),
+            ("VisionClient_TRIG", "Vision (Trigger)",
+             config.get("vision_trig_ip",    "127.0.0.1"), config.get("vision_trig_port",    8081)),
+            ("VisionClient_ID",   "Vision (ID)",
+             config.get("vision_id_ip",      "127.0.0.1"), config.get("vision_id_port",      8080)),
+            ("cobotClient",       "Cobot",
+             config.get("cobot_ip",          "192.168.57.2"), config.get("cobot_port",       9000)),
+            ("triggerserver",     "Trigger Server",
+             config.get("trigger_server_ip", "0.0.0.0"),   config.get("trigger_server_port", 5000)),
         ]
         for i, (key, label, ip, port) in enumerate(cards_info):
             card = ConnectionCard(label, ip, port)
             self.conn_cards[key] = card
             conn_grid.addWidget(card, i // 2, i % 2)
         main.addLayout(conn_grid)
+
+        # نسجّل listener على config عشان لما يتحفظ أي IP/Port يتحدث تلقائياً
+        config.add_listener(self._on_config_changed)
 
         # ── Stats grid (3 cards) ──
         stats_title = QLabel("الإحصائيات")
@@ -454,6 +471,27 @@ class StatusPage(QWidget):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.refresh)
         self.timer.start(500)
+
+    def _on_config_changed(self, key, value):
+        """
+        بيتنده من config listener لما أي قيمة تتغير.
+        ممكن يتنده من أي ثريد، فبنستخدم QTimer.singleShot
+        عشان التحديث يحصل على الـ main (GUI) thread بأمان.
+        """
+        # مش محتاجين نعمل حاجة لو المفتاح مش IP أو Port
+        all_ip_port_keys = {
+            k for pair in self._card_config_keys.values() for k in pair
+        }
+        if key in all_ip_port_keys:
+            QTimer.singleShot(0, self._refresh_endpoints)
+
+    def _refresh_endpoints(self):
+        """يحدّث labels الـ IP:Port في كل connection card من config الحالي."""
+        for card_key, card in self.conn_cards.items():
+            ip_key, port_key = self._card_config_keys[card_key]
+            ip   = config.get(ip_key,   "")
+            port = config.get(port_key, "")
+            card.endpoint_label.setText(f"{ip}:{port}")
 
     def _update_state_badge(self, is_running: bool):
         """يحدّث الـ badge وكلام الـ subtitle حسب وضع البرنامج."""
@@ -917,8 +955,8 @@ class MainWindow(QMainWindow):
 
         self._theme = "dark"
         self.setWindowTitle("Test Station Controller")
-        self.setMinimumSize(1100, 700)
-        self.resize(1280, 800)
+        self.setMinimumSize(900, 600)
+        self.resize(900, 600)
 
         # Central widget
         central = QWidget()

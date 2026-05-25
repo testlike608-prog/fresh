@@ -3,6 +3,8 @@ import time
 import queue
 import threading
 
+from barcode_utils import normalize_barcode
+
 # ─── Public API (للاستخدام من باقي الموديولز) ────────────────────────────────
 queue_barcode = queue.Queue()
 flag_barcode = False
@@ -21,17 +23,21 @@ def _on_key_event(e):
 
     if e.event_type == keyboard.KEY_DOWN:
         if e.name == 'enter':  # عادة الإسكانر يرسل زر Enter بعد قراءة الباركود
-            barcode = "".join(_recorded_keys)
-            if barcode:
-                if barcode==last_barcode:
+            raw = "".join(_recorded_keys)
+            _recorded_keys.clear()
+            if raw:
+                barcode = normalize_barcode(raw)
+                if not barcode:
+                    pass  # فضي بعد الـ normalize — تجاهل
+                elif barcode == last_barcode:
                     print(f"تم قراءة نفس الباركود مرة أخرى: {barcode} — تجاهل")
-                    _recorded_keys.clear()
-                else:    
+                else:
+                    if raw != barcode:
+                        print(f"QR→SN: {raw!r}  →  {barcode!r}")
                     queue_barcode.put(barcode)
                     last_barcode = barcode
                     flag_barcode = True
                     print(f"تمت قراءة الباركود: {barcode}")
-                    _recorded_keys.clear()
         elif len(e.name) == 1:  # لتجاهل أزرار زي Shift و CapsLock
             _recorded_keys.append(e.name)
 

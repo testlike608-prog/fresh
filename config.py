@@ -22,6 +22,7 @@ import os
 import sys
 import json
 import hashlib
+import hmac
 import threading
 import shutil
 from datetime import datetime
@@ -78,6 +79,12 @@ DEFAULT_CONFIG = {
     "result_images_folder": "result_images",
     # فولدرات إضافية تتنسخ فيها نسخة من كل صورة نتيجة (نسخ احتياطية)
     "result_images_backup_folders": [],
+
+    # ── Scan input mode ───────────────────────────────────────────
+    # "manual"  → سكانر كيبورد عادي
+    # "camera"  → كاميرا عادية بتقرأ الباركود بـ OpenCV + zxingcpp
+    "scan_mode":    "manual",
+    "camera_index": 0,
 
     # ── Intervals (بالثواني) ──────────────────────────────────────
     "watchdog_interval":         2.0,    # thread watchdog (thread_logger)
@@ -198,10 +205,10 @@ class Config:
 
     # ─── Password ───────────────────────────────────────────────────
     def verify_password(self, password: str) -> bool:
-        """تحقق من الباسوورد."""
+        """تحقق من الباسوورد — بيستخدم hmac.compare_digest عشان يمنع timing attacks."""
         with self._lock:
             stored = self._data.get("password_hash", "")
-        return _hash_password(password) == stored
+        return hmac.compare_digest(_hash_password(password), stored)
 
     def set_password(self, new_password: str) -> bool:
         """تغيير الباسوورد. لازم يكون 4 chars على الأقل."""

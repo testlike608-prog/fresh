@@ -38,7 +38,16 @@ class QtLogHandler(logging.Handler):
             msg = self.format(record)
             self.emitter.log_emitted.emit(record.levelname, msg)
         except Exception:
-            self.handleError(record)
+            # لا نستخدم self.handleError() عشان sys.stderr اتعمله redirect
+            # للـ logger نفسه وده بيسبب infinite recursion
+            # نكتب على الـ original stderr مباشرة لو موجود
+            try:
+                original_stderr = getattr(sys, "_original_stderr", None)
+                if original_stderr:
+                    import traceback
+                    traceback.print_exc(file=original_stderr)
+            except Exception:
+                pass
 
 
 class StreamToLogger:
@@ -48,20 +57,33 @@ class StreamToLogger:
         self.logger = logger
         self.level = level
         self._buffer = ""
+        self._in_write = False  # guard ضد الـ recursion
 
     def write(self, message):
-        if not message:
+        if not message or self._in_write:
             return
-        self._buffer += message
-        while "\n" in self._buffer:
-            line, self._buffer = self._buffer.split("\n", 1)
-            if line.strip():
-                self.logger.log(self.level, line.rstrip())
+        self._in_write = True
+        try:
+            self._buffer += message
+            while "\n" in self._buffer:
+                line, self._buffer = self._buffer.split("\n", 1)
+                if line.strip():
+                    self.logger.log(self.level, line.rstrip())
+        except Exception:
+            pass
+        finally:
+            self._in_write = False
 
     def flush(self):
-        if self._buffer.strip():
-            self.logger.log(self.level, self._buffer.rstrip())
-            self._buffer = ""
+        if self._buffer.strip() and not self._in_write:
+            self._in_write = True
+            try:
+                self.logger.log(self.level, self._buffer.rstrip())
+                self._buffer = ""
+            except Exception:
+                pass
+            finally:
+                self._in_write = False
 
     def isatty(self):
         return False

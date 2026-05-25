@@ -17,7 +17,7 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QPushButton,
     QFrame, QLineEdit, QSpinBox, QDoubleSpinBox, QDialog, QDialogButtonBox,
     QMessageBox, QScrollArea, QSizePolicy, QSpacerItem, QFormLayout,
-    QFileDialog, QListWidget,
+    QFileDialog, QListWidget, QComboBox,
 )
 
 import gui_styles
@@ -206,7 +206,7 @@ class FieldRow(QWidget):
         if kind == "int":
             self.input = QSpinBox()
             if key == "vision_test_count":
-                self.input.setRange(1, 6)
+                self.input.setRange(1, 30)
             else:
                 self.input.setRange(0, 999999)
             self.input.setValue(int(value))
@@ -384,6 +384,138 @@ class FolderListRow(QWidget):
 
 
 # ════════════════════════════════════════════════════════════════════
+#               Scan Mode Row (Manual / Camera toggle)
+# ════════════════════════════════════════════════════════════════════
+class ScanModeRow(QWidget):
+    """صف لاختيار وضع إدخال الباركود: كيبورد أو كاميرا."""
+
+    kind = "combo"
+
+    def __init__(self, label, key, value, parent=None):
+        super().__init__(parent)
+        self.key = key
+
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(0, 4, 0, 4)
+        layout.setSpacing(12)
+
+        lbl = QLabel(label)
+        lbl.setStyleSheet("font-weight: 500; min-width: 200px;")
+        lbl.setMinimumWidth(200)
+        layout.addWidget(lbl)
+
+        self.combo = QComboBox()
+        self.combo.addItem("🖊  Manual Scanner (سكانر كيبورد)", "manual")
+        self.combo.addItem("📷  Camera Scanner (كاميرا عادية)", "camera")
+        self.combo.setMinimumWidth(280)
+        self.combo.setEnabled(False)
+        self.set_value(value)
+        layout.addWidget(self.combo, 1)
+
+    def value(self):
+        return self.combo.currentData()
+
+    def set_value(self, value):
+        for i in range(self.combo.count()):
+            if self.combo.itemData(i) == str(value):
+                self.combo.setCurrentIndex(i)
+                return
+
+    def set_editable(self, editable: bool):
+        self.combo.setEnabled(editable)
+
+
+# ════════════════════════════════════════════════════════════════════
+#               Camera Select Row (اختيار الكاميرا)
+# ════════════════════════════════════════════════════════════════════
+class CameraSelectRow(QWidget):
+    """صف لاختيار الكاميرا مع زرار Detect للكشف عن الكاميرات المتاحة."""
+
+    kind = "int"
+
+    def __init__(self, label, key, value, parent=None):
+        super().__init__(parent)
+        self.key = key
+
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(0, 4, 0, 4)
+        layout.setSpacing(12)
+
+        lbl = QLabel(label)
+        lbl.setStyleSheet("font-weight: 500; min-width: 200px;")
+        lbl.setMinimumWidth(200)
+        layout.addWidget(lbl)
+
+        self.combo = QComboBox()
+        self.combo.setMinimumWidth(200)
+        self.combo.setEnabled(False)
+        # قيمة افتراضية
+        self.combo.addItem(f"Camera {int(value)}", int(value))
+        layout.addWidget(self.combo, 1)
+
+        self.detect_btn = QPushButton("🔍  اكتشاف الكاميرات")
+        self.detect_btn.setObjectName("SecondaryBtn")
+        self.detect_btn.setEnabled(False)
+        self.detect_btn.setToolTip("يكتشف كل الكاميرات المتوفرة على الجهاز")
+        self.detect_btn.clicked.connect(self._detect_cameras)
+        layout.addWidget(self.detect_btn)
+
+    def _detect_cameras(self):
+        """يكتشف الكاميرات المتاحة بتجربة فتح أول 6 كاميرات."""
+        try:
+            import cv2
+        except ImportError:
+            QMessageBox.warning(self, "خطأ", "مكتبة OpenCV مش موجودة.\nركّب الأول:\n  pip install opencv-python")
+            return
+
+        from PySide6.QtWidgets import QApplication
+        current_val = self.combo.currentData()
+        self.detect_btn.setEnabled(False)
+        self.detect_btn.setText("🔍  يكتشف...")
+        QApplication.processEvents()
+
+        found = []
+        for i in range(6):
+            # CAP_DSHOW أسرع على Windows
+            cap = cv2.VideoCapture(i, cv2.CAP_DSHOW)
+            if cap.isOpened():
+                found.append(i)
+                cap.release()
+
+        self.combo.clear()
+        if not found:
+            self.combo.addItem("❌ مفيش كاميرات", -1)
+        else:
+            for idx in found:
+                self.combo.addItem(f"📷  Camera {idx}", idx)
+            # نرجع للقيمة اللي كانت محددة لو لسه موجودة
+            for i in range(self.combo.count()):
+                if self.combo.itemData(i) == current_val:
+                    self.combo.setCurrentIndex(i)
+                    break
+
+        self.detect_btn.setText("🔍  اكتشاف الكاميرات")
+        self.detect_btn.setEnabled(True)
+
+    def value(self):
+        v = self.combo.currentData()
+        return int(v) if v is not None else 0
+
+    def set_value(self, value):
+        for i in range(self.combo.count()):
+            if self.combo.itemData(i) == int(value):
+                self.combo.setCurrentIndex(i)
+                return
+        # لو القيمة مش موجودة في الـ combo — نضيفها
+        self.combo.clear()
+        self.combo.addItem(f"Camera {int(value)}", int(value))
+
+    def set_editable(self, editable: bool):
+        self.combo.setEnabled(editable)
+        self.detect_btn.setEnabled(editable)
+
+
+# ════════════════════════════════════════════════════════════════════
 #                           Settings Page
 # ════════════════════════════════════════════════════════════════════
 class SettingsPage(QWidget):
@@ -480,7 +612,7 @@ class SettingsPage(QWidget):
         layout.addWidget(self._make_section_label("صور النتيجة (Result Images)"))
         layout.addWidget(self._make_result_images_card())
 
-        # â”€â”€â”€ Test sequence card â”€â”€â”€
+        # ─── Test sequence card ───
         layout.addWidget(self._make_section_label("Test Sequence"))
         sequence_card = self._make_card([
             ("Vision test count", "vision_test_count", "int"),
@@ -496,6 +628,10 @@ class SettingsPage(QWidget):
             ("Debug monitor interval",     "debug_monitor_interval",     "float"),
         ])
         layout.addWidget(intervals_card)
+
+        # ─── Scan Input Mode card ───
+        layout.addWidget(self._make_section_label("وضع قراءة الباركود (Scan Input Mode)"))
+        layout.addWidget(self._make_scan_mode_card())
 
         # ─── Actions row ───
         actions_card = QFrame()
@@ -615,6 +751,52 @@ class SettingsPage(QWidget):
         )
         self._track_row(backup_row)
         cl.addWidget(backup_row)
+
+        return card
+
+    def _make_scan_mode_card(self):
+        """
+        كارت وضع قراءة الباركود:
+        - ScanModeRow: تبديل بين Manual (كيبورد) و Camera (كاميرا)
+        - CameraSelectRow: اختيار الكاميرا مع زرار Detect
+        """
+        card = QFrame()
+        card.setObjectName("Card")
+        cl = QVBoxLayout(card)
+        cl.setContentsMargins(20, 14, 20, 14)
+        cl.setSpacing(6)
+
+        # hint في أعلى الكارت
+        hint = QLabel(
+            "اختار Manual لو عندك سكانر باركود (بيتصل كـ keyboard)، "
+            "أو Camera لو عايز تقرأ الباركود بكاميرا عادية."
+        )
+        hint.setStyleSheet("color: #94A3B8; font-size: 11px;")
+        hint.setWordWrap(True)
+        cl.addWidget(hint)
+
+        sep = QFrame()
+        sep.setFrameShape(QFrame.HLine)
+        sep.setStyleSheet("color: #1E293B;")
+        cl.addWidget(sep)
+
+        # وضع الإدخال
+        mode_row = ScanModeRow(
+            "وضع القراءة",
+            "scan_mode",
+            config.get("scan_mode", "manual"),
+        )
+        self._track_row(mode_row)
+        cl.addWidget(mode_row)
+
+        # اختيار الكاميرا
+        cam_row = CameraSelectRow(
+            "الكاميرا المستخدمة",
+            "camera_index",
+            config.get("camera_index", 0),
+        )
+        self._track_row(cam_row)
+        cl.addWidget(cam_row)
 
         return card
 

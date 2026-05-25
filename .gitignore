@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Logs
+logs/*.log
+logs/*.log.*
+
+# Build output
+dist/
+build/
+*.exe
+*.spec
+
+# Excel backups & temp reports
+*_backup_*.xlsx
+test_embedded_images*.xlsx
+
+# Camera feed temp folder
+live_camera_feed/
+
+# Result images (runtime generated)
+result_images/
+
+# Temp scripts
+append_fix.py
+
+# VS Code
+.vscode/
+
+# Env
+.env
