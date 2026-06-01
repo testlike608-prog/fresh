@@ -751,6 +751,7 @@ class App():
                 # هينتظر لحد ما يجي باركود أو نص ثانية (عشان نقدر نتحقق من _stop_app)
                 barcode = sc.queue_barcode.get(timeout=0.5)
             except queue.Empty:
+                log.info(f"Barcode not received within timeout period")
                 continue
 
             try:
@@ -980,8 +981,11 @@ class App():
 
         while not self._stop_app.is_set():
             try:
+                log.info(f"Sequance worker started and waiting for barcode in vision_queue...")
                 barcode = self.vision_queue.get(timeout=0.5)
+                log.info(f"Sequance worker started for barcode: {barcode}")
             except queue.Empty:
+                log.info("Sequance worker started but no barcode received within timeout period")
                 continue
 
             try:
@@ -1066,27 +1070,42 @@ class App():
             _scan_mode = _cfg.get("scan_mode", "manual")
 
             # ── camera_hub: نفتح الكاميرا مرة واحدة بس لكل المستهلكين ──
+            _hub_ok = False
             try:
                 import camera_hub
-                _cam_idx = int(_cfg.get("live_camera_index",
-                               _cfg.get("camera_index", 1)))
+                # نستخدم camera_index فقط (نفس المفتاح في settings)
+                _cam_idx = int(_cfg.get("camera_index", 1))
                 camera_hub.start(camera_index=_cam_idx)
-                log.info(f"camera_hub: started (camera {_cam_idx})")
+                # ننتظر الفريم الأول قبل ما نشغّل camera_barcode
+                # (فتح الكاميرا على Windows بياخد 1-2 ثانية)
+                _hub_ok = camera_hub.wait_for_frame(timeout=6.0)
+                if _hub_ok:
+                    log.info(f"camera_hub: ready (camera {_cam_idx})")
+                else:
+                    log.error(f"camera_hub: camera {_cam_idx} لم تستجب — تأكد من الاتصال")
             except Exception as _hub_err:
                 log.warning(f"camera_hub.start failed: {_hub_err}")
 
             if _scan_mode == "camera":
-                try:
-                    import camera_barcode
-                    camera_barcode.start()   # يقرأ من camera_hub، مش camera_index مباشرة
-                    log.info("Camera barcode scanner started (via camera_hub)")
-                except Exception as e:
-                    log.warning(f"Camera scanner could not start: {e} — falling back to keyboard")
+                if _hub_ok:
+                    try:
+                        import camera_barcode
+                        camera_barcode.start()
+                        log.info("Camera barcode scanner started (via camera_hub)")
+                    except Exception as e:
+                        log.warning(f"Camera scanner could not start: {e} — falling back to keyboard")
+                        try:
+                            sc.start_listener()
+                            log.info("Scanner listener started (keyboard fallback)")
+                        except Exception as e2:
+                            log.warning(f"Scanner listener also failed: {e2}")
+                else:
+                    log.warning("camera_hub فشل — الباركود بالكيبورد كـ fallback")
                     try:
                         sc.start_listener()
                         log.info("Scanner listener started (keyboard fallback)")
-                    except Exception as e2:
-                        log.warning(f"Scanner listener also failed: {e2}")
+                    except Exception as e:
+                        log.warning(f"Scanner listener also failed: {e}")
             else:
                 try:
                     sc.start_listener()

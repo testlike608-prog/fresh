@@ -29,6 +29,7 @@ _thread        = None
 _lock          = threading.Lock()          # يحمي _thread
 _frame_lock    = threading.Lock()          # يحمي _latest_frame
 _latest_frame  = None                      # آخر فريم اتقرأ
+_cam_index     = _DEFAULT_CAM_INDEX        # رقم الكاميرا الحالية (للـ restart)
 
 
 # ─────────────────────────────────────────────────────────────────────
@@ -47,6 +48,24 @@ def is_running():
         return _thread is not None and _thread.is_alive()
 
 
+def wait_for_frame(timeout: float = 5.0) -> bool:
+    """
+    يستنى لحد ما أول فريم يتقرأ (أو timeout).
+    يرجع True لو جه الفريم، False لو انتهى الوقت بدون فريم.
+    مهم تنده بعد start() وقبل ما camera_barcode يبدأ.
+    """
+    import time as _time
+    deadline = _time.time() + timeout
+    while _time.time() < deadline:
+        with _frame_lock:
+            if _latest_frame is not None:
+                log.info("camera_hub: ✓ أول فريم اتقرأ")
+                return True
+        _time.sleep(0.05)
+    log.error(f"camera_hub: ✗ timeout {timeout}s — مفيش فريم! تأكد من رقم الكاميرا.")
+    return False
+
+
 # ─────────────────────────────────────────────────────────────────────
 def _capture_loop(camera_index: int):
     """الـ loop الأساسي — يشتغل في ثريد منفصل، بيحدّث _latest_frame باستمرار."""
@@ -57,7 +76,7 @@ def _capture_loop(camera_index: int):
     if not cap.isOpened():
         cap = cv2.VideoCapture(camera_index)
     if not cap.isOpened():
-        log.error(f"camera_hub: ❌ مش قادر أفتح الكاميرا {camera_index}")
+        log.error(f"camera_hub: ❌ مش قادر أفتح الكاميرا {camera_index} — تأكد إنها متوصلة ومش مفتوحة ببرنامج تاني")
         return
 
     cap.set(cv2.CAP_PROP_FRAME_WIDTH,  _FRAME_WIDTH)
@@ -65,7 +84,9 @@ def _capture_loop(camera_index: int):
 
     actual_w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     actual_h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    log.info(f"camera_hub: ✅ كاميرا {camera_index} شغالة ({actual_w}x{actual_h})")
+    # نطبع رقم الكاميرا الحقيقي اللي اتفتحت عشان نتأكد
+    log.info(f"camera_hub: ✅ Camera {camera_index} شغالة ({actual_w}x{actual_h}) — index={camera_index}")
+    print(f"[camera_hub] opened camera index={camera_index} ({actual_w}x{actual_h})")
 
     try:
         while not _stop_event.is_set():
@@ -94,7 +115,7 @@ def start(camera_index: int = None):
     يبدأ التقاط الفريمات في ثريد خلفي.
     لو شغالة بالفعل مش بيعمل حاجة.
     """
-    global _thread
+    global _thread, _cam_index
 
     with _lock:
         if _thread is not None and _thread.is_alive():
@@ -105,10 +126,11 @@ def start(camera_index: int = None):
         if camera_index is None:
             try:
                 from config import config as _cfg
-                camera_index = int(_cfg.get("live_camera_index", _DEFAULT_CAM_INDEX))
+                camera_index = int(_cfg.get("camera_index", _DEFAULT_CAM_INDEX))
             except Exception:
                 camera_index = _DEFAULT_CAM_INDEX
 
+        _cam_index = camera_index          # احفظ الرقم للـ restart
         _stop_event.clear()
         _thread = threading.Thread(
             target=_capture_loop,
@@ -139,6 +161,24 @@ def stop(timeout: float = 3.0):
 
     with _lock:
         _thread = None
+
+
+def restart(camera_index: int = None):
+    """
+    يوقف الكاميرا ويشغّلها تاني برقم جديد.
+    بيُستخدم لما يتغير camera_index في الـ config.
+    """
+    global _cam_index
+    log.info(f"camera_hub: restarting (camera {camera_index})...")
+    stop(timeout=3.0)
+    time.sleep(0.2)   # استنى الـ driver يحرر الكاميرا
+    start(camera_index=camera_index)
+    ok = wait_for_frame(timeout=6.0)
+    if ok:
+        log.info(f"camera_hub: restarted successfully (camera {camera_index})")
+    else:
+        log.error(f"camera_hub: restart failed — camera {camera_index} لم تستجب")
+    return ok
 
 
 # ─────────────────────────────────────────────────────────────────────

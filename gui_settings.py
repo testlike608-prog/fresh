@@ -461,7 +461,11 @@ class CameraSelectRow(QWidget):
         layout.addWidget(self.detect_btn)
 
     def _detect_cameras(self):
-        """يكتشف الكاميرات المتاحة بتجربة فتح أول 6 كاميرات."""
+        """
+        يكتشف الكاميرات المتاحة.
+        بيوقف camera_hub مؤقتاً عشان يقدر يفتح كل الكاميرات للكشف،
+        ثم يشغّله تاني بعد ما يخلص.
+        """
         try:
             import cv2
         except ImportError:
@@ -471,28 +475,64 @@ class CameraSelectRow(QWidget):
         from PySide6.QtWidgets import QApplication
         current_val = self.combo.currentData()
         self.detect_btn.setEnabled(False)
-        self.detect_btn.setText("🔍  يكتشف...")
+        self.detect_btn.setText("⏳  يكتشف...")
         QApplication.processEvents()
 
+        # ── وقف camera_hub مؤقتاً عشان يحرر الكاميرا ──────────────
+        hub_was_running = False
+        hub_old_index   = None
+        try:
+            import camera_hub
+            if camera_hub.is_running():
+                hub_was_running = True
+                hub_old_index   = camera_hub._cam_index
+                camera_hub.stop(timeout=3.0)
+                import time as _t; _t.sleep(0.5)   # استنى الـ driver يحرر الكاميرا
+        except Exception:
+            pass
+
+        # ── الكشف عن الكاميرات (مع retry لو الكاميرا لسه ما اتحررتش) ──
+        import time as _t2
         found = []
         for i in range(6):
-            # CAP_DSHOW أسرع على Windows
-            cap = cv2.VideoCapture(i, cv2.CAP_DSHOW)
-            if cap.isOpened():
-                found.append(i)
+            opened = False
+            for _attempt in range(2):   # نجرب مرتين لكل كاميرا
+                cap = cv2.VideoCapture(i, cv2.CAP_DSHOW)
+                if not cap.isOpened():
+                    cap.release()
+                    cap = cv2.VideoCapture(i)
+                if cap.isOpened():
+                    found.append(i)
+                    cap.release()
+                    opened = True
+                    break
                 cap.release()
+                _t2.sleep(0.2)   # انتظار إضافي لو لسه محجوزة
 
+        # ── نشغّل camera_hub تاني بنفس الرقم القديم ─────────────────
+        if hub_was_running and hub_old_index is not None:
+            try:
+                import camera_hub
+                camera_hub.start(camera_index=hub_old_index)
+            except Exception:
+                pass
+
+        # ── تحديث الـ combo ──────────────────────────────────────────
         self.combo.clear()
         if not found:
             self.combo.addItem("❌ مفيش كاميرات", -1)
         else:
             for idx in found:
-                self.combo.addItem(f"📷  Camera {idx}", idx)
-            # نرجع للقيمة اللي كانت محددة لو لسه موجودة
+                self.combo.addItem(f"📷  Camera {idx}  (index={idx})", idx)
+            # نرجع للقيمة المحددة قبل الكشف لو لسه موجودة
+            restored = False
             for i in range(self.combo.count()):
                 if self.combo.itemData(i) == current_val:
                     self.combo.setCurrentIndex(i)
+                    restored = True
                     break
+            if not restored and self.combo.count() > 0:
+                self.combo.setCurrentIndex(0)  # اختار أول كاميرا لو القديمة مش موجودة
 
         self.detect_btn.setText("🔍  اكتشاف الكاميرات")
         self.detect_btn.setEnabled(True)
@@ -862,15 +902,35 @@ class SettingsPage(QWidget):
                 return
             updates[row.key] = val
 
+        # نعرف الـ camera_index القديم قبل الحفظ
+        old_cam_index = config.get("camera_index", 1)
+
         changed = config.update_many(updates)
-        if changed:
-            QMessageBox.information(
-                self, "تم الحفظ",
-                f"اتحفظ {changed} تعديل في config.json.\n\n"
-                f"ملاحظة: التعديلات على IP/Port محتاجة restart للبرنامج عشان تطبق."
-            )
-        else:
+        if not changed:
             QMessageBox.information(self, "مفيش تعديل", "مفيش حاجه اتغيرت من اللي محفوظ.")
+            return
+
+        # ── لو camera_index اتغير → restart camera_hub بالرقم الجديد ──
+        new_cam_index = updates.get("camera_index", old_cam_index)
+        cam_changed   = (new_cam_index != old_cam_index)
+
+        extra_msg = ""
+        if cam_changed:
+            try:
+                import camera_hub
+                if camera_hub.is_running():
+                    camera_hub.restart(camera_index=int(new_cam_index))
+                    extra_msg = f"\n✓ الكاميرا تغيرت لـ Camera {new_cam_index} تلقائياً."
+                else:
+                    extra_msg = f"\nسيتم استخدام Camera {new_cam_index} عند الضغط على Start."
+            except Exception as e:
+                extra_msg = f"\n⚠ فشل تغيير الكاميرا: {e}"
+
+        QMessageBox.information(
+            self, "تم الحفظ",
+            f"اتحفظ {changed} تعديل في config.json.{extra_msg}\n\n"
+            f"ملاحظة: التعديلات على IP/Port محتاجة restart للبرنامج عشان تطبق."
+        )
 
     def _on_reset(self):
         reply = QMessageBox.question(

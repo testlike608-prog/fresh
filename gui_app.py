@@ -24,7 +24,7 @@ if _HERE not in sys.path:
     sys.path.insert(0, _HERE)
 
 from PySide6.QtCore import Qt, QTimer, Signal, QObject
-from PySide6.QtGui import QFont, QTextCursor, QTextCharFormat, QColor, QIcon
+from PySide6.QtGui import QFont, QTextCursor, QTextCharFormat, QColor, QIcon, QImage, QPixmap
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QGridLayout,
     QLabel, QPushButton, QStackedWidget, QFrame, QPlainTextEdit, QLineEdit,
@@ -280,6 +280,98 @@ class StageProgressCard(QFrame):
 # ════════════════════════════════════════════════════════════════════
 #                             Status Page
 # ════════════════════════════════════════════════════════════════════
+
+class CameraPreviewWidget(QWidget):
+    """
+    ويدجت بيعرض صورة لايف من camera_hub.
+    بيتحدث كل 80ms (~12fps) من خلال QTimer.
+    لو الكاميرا مش شغالة بيعرض placeholder.
+    """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._preview_w = 320
+        self._preview_h = 240
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(6)
+
+        # ── العنوان ──
+        title_row = QHBoxLayout()
+        title = QLabel("📷  Live Camera")
+        title.setStyleSheet("font-size: 13px; font-weight: 600;")
+        title_row.addWidget(title)
+        title_row.addStretch()
+
+        self._status_dot = QLabel("●")
+        self._status_dot.setStyleSheet("color: #4B5563; font-size: 16px;")
+        title_row.addWidget(self._status_dot)
+        layout.addLayout(title_row)
+
+        # ── إطار الصورة ──
+        frame_container = QFrame()
+        frame_container.setFixedSize(self._preview_w, self._preview_h)
+        frame_container.setStyleSheet(
+            "background: #0F172A; border: 1px solid #1E293B; border-radius: 8px;"
+        )
+        frame_layout = QVBoxLayout(frame_container)
+        frame_layout.setContentsMargins(0, 0, 0, 0)
+
+        self._img_label = QLabel()
+        self._img_label.setAlignment(Qt.AlignCenter)
+        self._img_label.setFixedSize(self._preview_w, self._preview_h)
+        self._img_label.setStyleSheet("border-radius: 8px;")
+        self._show_placeholder()
+        frame_layout.addWidget(self._img_label)
+
+        layout.addWidget(frame_container)
+
+        # ── QTimer للتحديث ~~12fps ──
+        self._cam_timer = QTimer(self)
+        self._cam_timer.timeout.connect(self._refresh_frame)
+        self._cam_timer.start(80)   # 80ms ≈ 12fps
+
+    def _show_placeholder(self):
+        """يعرض رسالة لما الكاميرا مش شغالة."""
+        self._img_label.clear()
+        self._img_label.setText("الكاميرا غير متصلة\nأو لم تبدأ بعد")
+        self._img_label.setStyleSheet(
+            "color: #4B5563; font-size: 13px; border-radius: 8px;"
+        )
+        self._status_dot.setStyleSheet("color: #4B5563; font-size: 16px;")
+
+    def _refresh_frame(self):
+        """يسحب أحدث فريم من camera_hub ويعرضه."""
+        try:
+            import camera_hub
+            frame = camera_hub.get_frame()
+            if frame is None:
+                self._show_placeholder()
+                return
+
+            import cv2
+            # تحويل BGR → RGB عشان Qt
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            h, w, ch  = frame_rgb.shape
+            qt_img    = QImage(
+                frame_rgb.data, w, h,
+                ch * w,
+                QImage.Format_RGB888
+            )
+            pixmap = QPixmap.fromImage(qt_img).scaled(
+                self._preview_w, self._preview_h,
+                Qt.KeepAspectRatio,
+                Qt.SmoothTransformation,
+            )
+            self._img_label.setPixmap(pixmap)
+            self._img_label.setStyleSheet("border-radius: 8px;")
+            self._status_dot.setStyleSheet("color: #10B981; font-size: 16px;")  # أخضر
+
+        except Exception:
+            self._show_placeholder()
+
+
 class StatusPage(QWidget):
     """صفحة Status: اتصالات + المرحلة + إحصائيات."""
 
@@ -398,6 +490,13 @@ class StatusPage(QWidget):
         # ── Stage Progress (كارت كبير) ──
         self.stage_card = StageProgressCard()
         main.addWidget(self.stage_card)
+
+        # ── Live Camera Preview ──
+        cam_row = QHBoxLayout()
+        self.camera_preview = CameraPreviewWidget()
+        cam_row.addWidget(self.camera_preview)
+        cam_row.addStretch()
+        main.addLayout(cam_row)
 
         # ── Connection cards (2x2 grid) ──
         connections_title = QLabel("الاتصالات")

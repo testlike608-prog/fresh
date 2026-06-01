@@ -44,13 +44,17 @@ def _decode_loop(stop_event: threading.Event):
     frame_interval       = 1.0 / DECODE_FPS
     last_decode_at       = 0.0
     _last_queued_barcode = None
+    _none_warn_at        = 0.0   # عشان ما نكررش الـ warning كل 50ms
 
     log.info("[CameraScanner] في انتظار باركود... (يقرأ من camera_hub)")
 
     while not stop_event.is_set():
         frame = camera_hub.get_frame()
         if frame is None:
-            # الكاميرا لسه مبدأتش أو في مشكلة
+            now = time.time()
+            if now - _none_warn_at > 5.0:  # warning كل 5 ثواني بس
+                log.warning("[CameraScanner] camera_hub مش بابعت فريمات — استنى...")
+                _none_warn_at = now
             time.sleep(0.05)
             continue
 
@@ -95,7 +99,7 @@ def _decode_loop(stop_event: threading.Event):
             scanner.queue_barcode.put(barcode)
             scanner.last_barcode = barcode
             scanner.flag_barcode = True
-            log.info(f"[CameraScanner] 📷 باركود: {barcode}  ({result.format})")
+            log.info(f"[CameraScanner] ✅ باركود: {barcode!r}  ({result.format}) → queue")
             break   # نأخد أول باركود بس في الفريم
 
     log.info("[CameraScanner] أوقف.")
