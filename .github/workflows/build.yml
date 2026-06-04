@@ -32,7 +32,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install nuitka
-          pip install PySide6 openpyxl pandas numpy keyboard Pillow pyserial opencv-python pyzbar zxingcpp
+          pip install PySide6 openpyxl pandas numpy keyboard Pillow pyserial opencv-python pyzbar zxing-cpp
 
       - name: Run build_exe.py
         working-directory: ${{ github.workspace }}
