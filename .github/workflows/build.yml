@@ -36,6 +36,9 @@ jobs:
 
       - name: Run build_exe.py
         working-directory: ${{ github.workspace }}
+        env:
+          PYTHONIOENCODING: utf-8
+          PYTHONUTF8: 1
         run: |
           python build_exe.py
 
