@@ -32,7 +32,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install nuitka
-          pip install PySide6 openpyxl pandas numpy keyboard
+          pip install PySide6 openpyxl pandas numpy keyboard Pillow
 
       - name: Run build_exe.py
         working-directory: ${{ github.workspace }}

@@ -89668,3 +89668,1473 @@ app.vision_queue           size = 0, last = []
 ----------------------------------------------------------------------
 threads (3): ['DebugMonitor', 'MainThread', 'ThreadWatchdog']
 ======================================================================
+
+######################################################################
+# tick #1  @ 2026-06-04 11:38:53
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:38:53
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = False
+scanner.last_barcode       = None
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  DISCONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  DISCONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  DISCONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 0, last = []
+app.triggerserver.clients         count = 0
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (3): ['DebugMonitor', 'MainThread', 'ThreadWatchdog']
+======================================================================
+
+######################################################################
+# tick #2  @ 2026-06-04 11:38:55
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:38:55
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = False
+scanner.last_barcode       = None
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  DISCONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  DISCONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  DISCONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 0, last = []
+app.triggerserver.clients         count = 0
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (3): ['DebugMonitor', 'MainThread', 'ThreadWatchdog']
+======================================================================
+
+######################################################################
+# tick #3  @ 2026-06-04 11:38:57
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:38:57
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = False
+scanner.last_barcode       = None
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  DISCONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  DISCONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  DISCONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 0, last = []
+app.triggerserver.clients         count = 0
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (3): ['DebugMonitor', 'MainThread', 'ThreadWatchdog']
+======================================================================
+
+######################################################################
+# tick #4  @ 2026-06-04 11:38:59
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:38:59
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = False
+scanner.last_barcode       = None
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  DISCONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  DISCONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  DISCONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 0, last = []
+app.triggerserver.clients         count = 0
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (4): ['DebugMonitor', 'MainThread', 'ThreadWatchdog', 'camera-hub']
+======================================================================
+
+######################################################################
+# tick #5  @ 2026-06-04 11:39:01
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:01
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = False
+scanner.last_barcode       = None
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 0, last = []
+app.triggerserver.clients         count = 0
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (12): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #6  @ 2026-06-04 11:39:03
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:03
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = False
+scanner.last_barcode       = None
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 0, last = []
+app.triggerserver.clients         count = 0
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (12): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #7  @ 2026-06-04 11:39:05
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:05
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = False
+scanner.last_barcode       = None
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 0, last = []
+app.triggerserver.clients         count = 0
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (12): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #8  @ 2026-06-04 11:39:07
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:07
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = False
+scanner.last_barcode       = None
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 0, last = []
+app.triggerserver.clients         count = 0
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (12): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #9  @ 2026-06-04 11:39:09
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:09
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = False
+scanner.last_barcode       = None
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 0, last = []
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #10  @ 2026-06-04 11:39:11
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:11
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = False
+scanner.last_barcode       = None
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 0, last = []
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #11  @ 2026-06-04 11:39:13
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:13
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = False
+scanner.last_barcode       = None
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 0, last = []
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #12  @ 2026-06-04 11:39:15
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:15
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = False
+scanner.last_barcode       = None
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 0, last = []
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #13  @ 2026-06-04 11:39:17
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:17
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = False
+scanner.last_barcode       = None
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 0, last = []
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #14  @ 2026-06-04 11:39:19
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:19
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = False
+scanner.last_barcode       = None
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 0, last = []
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #15  @ 2026-06-04 11:39:21
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:21
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = False
+scanner.last_barcode       = None
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 0, last = []
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #16  @ 2026-06-04 11:39:23
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:23
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = False
+scanner.last_barcode       = None
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #17  @ 2026-06-04 11:39:25
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:25
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = False
+scanner.last_barcode       = None
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #18  @ 2026-06-04 11:39:27
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:27
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = False
+scanner.last_barcode       = None
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #19  @ 2026-06-04 11:39:29
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:29
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = False
+scanner.last_barcode       = None
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #20  @ 2026-06-04 11:39:31
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:31
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = False
+scanner.last_barcode       = None
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #21  @ 2026-06-04 11:39:33
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:33
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = False
+scanner.last_barcode       = None
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #22  @ 2026-06-04 11:39:35
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:35
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = False
+scanner.last_barcode       = None
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #23  @ 2026-06-04 11:39:37
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:37
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = False
+scanner.last_barcode       = None
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #24  @ 2026-06-04 11:39:39
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:39
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = False
+scanner.last_barcode       = None
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #25  @ 2026-06-04 11:39:41
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:41
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #26  @ 2026-06-04 11:39:43
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:43
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #27  @ 2026-06-04 11:39:45
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:45
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #28  @ 2026-06-04 11:39:47
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:47
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #29  @ 2026-06-04 11:39:49
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:49
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #30  @ 2026-06-04 11:39:51
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:51
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #31  @ 2026-06-04 11:39:53
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:53
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #32  @ 2026-06-04 11:39:55
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:55
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #33  @ 2026-06-04 11:39:57
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:57
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #34  @ 2026-06-04 11:39:59
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:39:59
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #35  @ 2026-06-04 11:40:01
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:40:01
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #36  @ 2026-06-04 11:40:03
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:40:03
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #37  @ 2026-06-04 11:40:05
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:40:05
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #38  @ 2026-06-04 11:40:07
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:40:07
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #39  @ 2026-06-04 11:40:09
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:40:09
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #40  @ 2026-06-04 11:40:11
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:40:11
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #41  @ 2026-06-04 11:40:13
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:40:13
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #42  @ 2026-06-04 11:40:15
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:40:15
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #43  @ 2026-06-04 11:40:17
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:40:17
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #44  @ 2026-06-04 11:40:19
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:40:19
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #45  @ 2026-06-04 11:40:21
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:40:21
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #46  @ 2026-06-04 11:40:23
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:40:23
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #47  @ 2026-06-04 11:40:25
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:40:25
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #48  @ 2026-06-04 11:40:27
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:40:27
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  CONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  CONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  CONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================
+
+######################################################################
+# tick #49  @ 2026-06-04 11:40:29
+######################################################################
+======================================================================
+[MONITOR] snapshot @ 2026-06-04 11:40:29
+----------------------------------------------------------------------
+scanner.queue_barcode      size = 0
+  last items (up to 5)     = []
+scanner.flag_barcode       = True
+scanner.last_barcode       = '2511TL005663ISI'
+scanner._recorded_keys     = []
+scanner._listener_started  = False
+----------------------------------------------------------------------
+app.VisionClient_ID.shared_queue   size = 0, last = []
+app.VisionClient_ID.receive_queue  size = 0, last = []
+app.VisionClient_ID        127.0.0.1:8080  DISCONNECTED
+app.VisionClient_TRIG.shared_queue   size = 0, last = []
+app.VisionClient_TRIG.receive_queue  size = 0, last = []
+app.VisionClient_TRIG      127.0.0.1:8081  DISCONNECTED
+app.cobotClient.shared_queue   size = 0, last = []
+app.cobotClient.receive_queue  size = 0, last = []
+app.cobotClient            127.0.0.1:9000  DISCONNECTED
+app.triggerserver.shared_queue   size = 0, last = []
+app.triggerserver.receive_queue  size = 1, last = [{'addr': ('127.0.0.1', 61379), 'data': b'ok', 'ts': 1780562362.8889048}]
+app.triggerserver.clients         count = 1
+app.vision_queue           size = 0, last = []
+----------------------------------------------------------------------
+threads (13): ['App-sequance-worker', 'App-shutdown', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+======================================================================

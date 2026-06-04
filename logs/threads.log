@@ -27863,3 +27863,312 @@
 2026-06-04 09:53:08.646 [DEBUG   ] [ThreadWatchdog tid=17564] Watchdog snapshot: 3 alive — ['DebugMonitor', 'MainThread', 'ThreadWatchdog']
 2026-06-04 09:53:10.648 [DEBUG   ] [ThreadWatchdog tid=17564] Watchdog snapshot: 3 alive — ['DebugMonitor', 'MainThread', 'ThreadWatchdog']
 2026-06-04 09:53:11.670 [WARNING ] [MainThread tid=6608] App.stop() called but not running
+2026-06-04 11:38:50.372 [INFO    ] [MainThread tid=11924] ======================================================================
+2026-06-04 11:38:50.374 [INFO    ] [MainThread tid=11924] Logger initialised — log file: c:\Users\Automation_Meeserv\Desktop\FRESH\code\logs\threads.log
+2026-06-04 11:38:50.377 [INFO    ] [MainThread tid=11924] Python 3.11.5 on win32
+2026-06-04 11:38:50.379 [INFO    ] [MainThread tid=11924] ======================================================================
+2026-06-04 11:38:50.381 [INFO    ] [ThreadWatchdog tid=20380] Watchdog started — checking every 2.0s
+2026-06-04 11:38:50.381 [INFO    ] [MainThread tid=11924] thread_logger setup complete ✓
+2026-06-04 11:38:50.383 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog: + thread appeared 'MainThread' (daemon=False)
+2026-06-04 11:38:50.384 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog: + thread appeared 'ThreadWatchdog' (daemon=True)
+2026-06-04 11:38:50.389 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 2 alive — ['MainThread', 'ThreadWatchdog']
+2026-06-04 11:38:52.391 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 2 alive — ['MainThread', 'ThreadWatchdog']
+2026-06-04 11:38:53.087 [INFO    ] [MainThread tid=11924] === GUI: App created (STOPPED by default) ===
+2026-06-04 11:38:54.837 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog: + thread appeared 'DebugMonitor' (daemon=True)
+2026-06-04 11:38:54.837 [INFO    ] [MainThread tid=11924] === GUI: window shown - default state is STOPPED, press Start to begin ===
+2026-06-04 11:38:54.837 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 3 alive — ['DebugMonitor', 'MainThread', 'ThreadWatchdog']
+2026-06-04 11:38:56.839 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 3 alive — ['DebugMonitor', 'MainThread', 'ThreadWatchdog']
+2026-06-04 11:38:58.480 [INFO    ] [MainThread tid=11924] ==================================================
+2026-06-04 11:38:58.482 [INFO    ] [MainThread tid=11924] App: STARTING...
+2026-06-04 11:38:58.484 [INFO    ] [MainThread tid=11924] ==================================================
+2026-06-04 11:38:58.840 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog: + thread appeared 'camera-hub' (daemon=True)
+2026-06-04 11:38:58.840 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 4 alive — ['DebugMonitor', 'MainThread', 'ThreadWatchdog', 'camera-hub']
+2026-06-04 11:39:00.458 [INFO    ] [MainThread tid=11924] camera_hub: ready for barcode scanning (camera 0)
+2026-06-04 11:39:00.483 [INFO    ] [MainThread tid=11924] Camera barcode scanner started (via camera_hub)
+2026-06-04 11:39:00.493 [INFO    ] [TCP_SERVER-accept-loop tid=20764] ▶ Thread STARTED  (TCP_SERVER-accept-loop)
+2026-06-04 11:39:00.502 [INFO    ] [TCPClient-127.0.0.1:8081-reconnect-watchdog tid=13972] ▶ Thread STARTED  (TCPClient-127.0.0.1:8081-reconnect-watchdog)
+2026-06-04 11:39:00.512 [INFO    ] [TCPClient-127.0.0.1:8081-reconnect-watchdog tid=13972] Connection watchdog started for VisionClient_TRIG
+2026-06-04 11:39:00.513 [INFO    ] [TCPClient-127.0.0.1:8080-reconnect-watchdog tid=15844] ▶ Thread STARTED  (TCPClient-127.0.0.1:8080-reconnect-watchdog)
+2026-06-04 11:39:00.520 [INFO    ] [TCPClient-127.0.0.1:9000-reconnect-watchdog tid=16912] ▶ Thread STARTED  (TCPClient-127.0.0.1:9000-reconnect-watchdog)
+2026-06-04 11:39:00.535 [INFO    ] [TCPClient-127.0.0.1:8080-reconnect-watchdog tid=15844] Connection watchdog started for VisionClient_ID
+2026-06-04 11:39:00.539 [INFO    ] [TCPClient-127.0.0.1:9000-reconnect-watchdog tid=16912] Connection watchdog started for cobotClient
+2026-06-04 11:39:00.541 [INFO    ] [App-barcode-from-scanner tid=15452] ▶ Thread STARTED  (App-barcode-from-scanner)
+2026-06-04 11:39:00.551 [INFO    ] [App-sequance-worker tid=3264] ▶ Thread STARTED  (App-sequance-worker)
+2026-06-04 11:39:00.567 [INFO    ] [App-sequance-worker tid=3264] Sequance worker started - waiting for barcodes in vision_queue...
+2026-06-04 11:39:00.568 [INFO    ] [MainThread tid=11924] live_image: started (reads from camera_hub)
+2026-06-04 11:39:00.586 [INFO    ] [MainThread tid=11924] App: STARTED successfully
+2026-06-04 11:39:00.844 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog: + thread appeared 'live-image' (daemon=True)
+2026-06-04 11:39:00.847 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog: + thread appeared 'TCPClient-127.0.0.1:9000-reconnect-watchdog' (daemon=True)
+2026-06-04 11:39:00.848 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog: + thread appeared 'TCPClient-127.0.0.1:8081-reconnect-watchdog' (daemon=True)
+2026-06-04 11:39:00.849 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog: + thread appeared 'TCP_SERVER-accept-loop' (daemon=True)
+2026-06-04 11:39:00.851 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog: + thread appeared 'App-sequance-worker' (daemon=True)
+2026-06-04 11:39:00.852 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog: + thread appeared 'App-barcode-from-scanner' (daemon=True)
+2026-06-04 11:39:00.853 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog: + thread appeared 'camera-barcode-scanner' (daemon=True)
+2026-06-04 11:39:00.854 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog: + thread appeared 'TCPClient-127.0.0.1:8080-reconnect-watchdog' (daemon=True)
+2026-06-04 11:39:00.855 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 12 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:01.052 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:01.557 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:02.064 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:02.567 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:02.857 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 12 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:03.074 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:03.577 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:04.085 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:04.597 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:04.858 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 12 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:05.099 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:05.600 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:06.137 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:06.652 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:06.860 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 12 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:07.154 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:07.660 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:07.819 [INFO    ] [TCP_SERVER-client-127.0.0.1:61379 tid=15180] ▶ Thread STARTED  (TCP_SERVER-client-127.0.0.1:61379)
+2026-06-04 11:39:08.166 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:08.667 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:08.862 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog: + thread appeared 'TCP_SERVER-client-127.0.0.1:61379' (daemon=True)
+2026-06-04 11:39:08.863 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:09.171 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:09.676 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:10.178 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:10.684 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:10.865 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:11.189 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:11.694 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:12.197 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:12.703 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:12.866 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:13.204 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:13.705 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:14.208 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:14.709 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:14.869 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:15.210 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:15.712 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:16.219 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:16.723 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:16.872 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:17.225 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:17.727 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:18.231 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:18.733 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:18.872 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:19.236 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:19.738 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:20.239 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:20.740 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:20.873 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:21.241 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:21.742 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:22.245 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:22.746 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:22.874 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:23.249 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:23.754 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:24.258 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:24.764 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:24.876 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:25.268 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:25.769 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:26.269 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:26.771 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:26.877 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:27.272 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:27.779 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:28.289 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:28.798 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:28.879 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:29.300 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:29.803 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:30.305 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:30.807 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:30.880 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:31.316 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:31.816 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:32.318 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:32.824 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:32.881 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:33.325 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:33.827 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:34.330 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:34.832 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:34.882 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:35.333 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:35.835 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:36.336 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:36.838 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:36.882 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:37.341 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:37.842 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:38.343 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:38.846 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:38.884 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:39.267 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode received and put in vision_queue: 2511TL005663ISI
+2026-06-04 11:39:39.267 [INFO    ] [App-sequance-worker tid=3264] Sequance worker started for barcode: 2511TL005663ISI
+2026-06-04 11:39:39.747 [INFO    ] [App-sequance-worker tid=3264] [SEQ] → cobot: send program=1
+2026-06-04 11:39:39.748 [INFO    ] [App-sequance-worker tid=3264] [SEQ] ← cobot: ack program=1
+2026-06-04 11:39:39.750 [INFO    ] [App-sequance-worker tid=3264] [SEQ] Test 1/3: → cobot: send_request(21), waiting...
+2026-06-04 11:39:39.769 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:40.271 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:40.771 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:40.886 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:41.272 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:41.773 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:42.275 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:42.775 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:42.887 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:43.277 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:43.777 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:44.278 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:44.780 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:44.887 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:45.281 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:45.783 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:46.285 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:46.786 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:46.888 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:47.288 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:47.789 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:48.306 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:48.808 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:48.889 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:49.312 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:49.814 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:50.318 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:50.820 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:50.893 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:51.322 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:51.824 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:52.325 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:52.828 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:52.895 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:53.329 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:53.835 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:54.337 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:54.839 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:54.897 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:55.341 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:55.371 [INFO    ] [App-sequance-worker tid=3264] [SEQ] Test 1/3: ← cobot: ack(21) = b'point1 d'
+2026-06-04 11:39:55.372 [INFO    ] [App-sequance-worker tid=3264] [SEQ] Test 1/3: → VisionID: send_only(2511TL005663ISI_0)
+2026-06-04 11:39:55.378 [INFO    ] [App-sequance-worker tid=3264] [SEQ] Test 1/3: → VisionTRIG: send_request(11), waiting...
+2026-06-04 11:39:55.844 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:56.344 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:56.845 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:56.899 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:57.348 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:57.850 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:58.352 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:58.854 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:58.900 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:39:59.356 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:39:59.863 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:00.004 [INFO    ] [App-sequance-worker tid=3264] [SEQ] Test 1/3: ← VisionTRIG: raw=b'1'  parsed=1
+2026-06-04 11:40:00.006 [INFO    ] [App-sequance-worker tid=3264] [SEQ] Test 2/3: → cobot: send_request(22), waiting...
+2026-06-04 11:40:00.369 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:00.883 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:00.901 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:40:01.384 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:01.885 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:02.388 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:02.903 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:40:02.915 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:03.416 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:03.918 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:04.421 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:04.903 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:40:04.923 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:05.427 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:05.656 [INFO    ] [App-sequance-worker tid=3264] [SEQ] Test 2/3: ← cobot: ack(22) = b'd'
+2026-06-04 11:40:05.659 [INFO    ] [App-sequance-worker tid=3264] [SEQ] Test 2/3: → VisionID: send_only(2511TL005663ISI_1)
+2026-06-04 11:40:05.661 [INFO    ] [App-sequance-worker tid=3264] [SEQ] Test 2/3: → VisionTRIG: send_request(12), waiting...
+2026-06-04 11:40:05.929 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:06.429 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:06.905 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:40:06.932 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:07.452 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:07.976 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:08.476 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:08.907 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:40:08.984 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:09.488 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:09.802 [INFO    ] [App-sequance-worker tid=3264] [SEQ] Test 2/3: ← VisionTRIG: raw=b'1'  parsed=1
+2026-06-04 11:40:09.803 [INFO    ] [App-sequance-worker tid=3264] [SEQ] Test 3/3: → cobot: send_request(23), waiting...
+2026-06-04 11:40:09.989 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:10.490 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:10.910 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:40:10.991 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:11.493 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:11.996 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:12.498 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:12.911 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:40:13.000 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:13.507 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:14.014 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:14.518 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:14.912 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:40:15.036 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:15.539 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:16.006 [INFO    ] [App-sequance-worker tid=3264] [SEQ] Test 3/3: ← cobot: ack(23) = b'3'
+2026-06-04 11:40:16.008 [INFO    ] [App-sequance-worker tid=3264] [SEQ] Test 3/3: → VisionID: send_only(2511TL005663ISI_2)
+2026-06-04 11:40:16.015 [INFO    ] [App-sequance-worker tid=3264] [SEQ] Test 3/3: → VisionTRIG: send_request(13), waiting...
+2026-06-04 11:40:16.040 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:16.542 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:16.914 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:40:17.043 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:17.547 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:18.052 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:18.553 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:18.916 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:40:18.982 [INFO    ] [App-sequance-worker tid=3264] [SEQ] Test 3/3: ← VisionTRIG: raw=b'1'  parsed=1
+2026-06-04 11:40:18.983 [INFO    ] [App-sequance-worker tid=3264] [SEQ] results=[1, 1, 1]  →  final=pass(1)
+2026-06-04 11:40:18.984 [INFO    ] [App-sequance-worker tid=3264] [SEQ] → cobot: send_only(1) [final result]
+2026-06-04 11:40:18.986 [INFO    ] [App-sequance-worker tid=3264] [SEQ] Sequence complete.
+2026-06-04 11:40:19.056 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:19.261 [INFO    ] [App-sequance-worker tid=3264] Done barcode=2511TL005663ISI program=1 result=pass
+2026-06-04 11:40:19.561 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:20.063 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:20.565 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:20.917 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:40:21.068 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:21.568 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:22.074 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:22.575 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:22.918 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:40:23.078 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:23.582 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:24.084 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:24.585 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:24.920 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:40:25.087 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:25.591 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:26.093 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:26.595 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:26.922 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 13 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:40:27.096 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:27.598 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:28.099 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:28.600 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:28.883 [INFO    ] [MainThread tid=11924] App: STOPPING...
+2026-06-04 11:40:28.886 [INFO    ] [App-shutdown tid=18028] ▶ Thread STARTED  (App-shutdown)
+2026-06-04 11:40:28.888 [INFO    ] [App-shutdown tid=18028] App: waiting for current sequence to finish (max 120s)...
+2026-06-04 11:40:28.923 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog: + thread appeared 'App-shutdown' (daemon=True)
+2026-06-04 11:40:28.925 [DEBUG   ] [ThreadWatchdog tid=20380] Watchdog snapshot: 14 alive — ['App-barcode-from-scanner', 'App-sequance-worker', 'App-shutdown', 'DebugMonitor', 'MainThread', 'TCPClient-127.0.0.1:8080-reconnect-watchdog', 'TCPClient-127.0.0.1:8081-reconnect-watchdog', 'TCPClient-127.0.0.1:9000-reconnect-watchdog', 'TCP_SERVER-accept-loop', 'TCP_SERVER-client-127.0.0.1:61379', 'ThreadWatchdog', 'camera-barcode-scanner', 'camera-hub', 'live-image']
+2026-06-04 11:40:29.103 [INFO    ] [App-barcode-from-scanner tid=15452] Barcode not received within timeout period
+2026-06-04 11:40:29.104 [INFO    ] [App-barcode-from-scanner tid=15452] ✓ Thread FINISHED (App-barcode-from-scanner)  — exited cleanly
+2026-06-04 11:40:29.285 [INFO    ] [App-sequance-worker tid=3264] ✓ Thread FINISHED (App-sequance-worker)  — exited cleanly
+2026-06-04 11:40:29.289 [INFO    ] [App-shutdown tid=18028] App: sequence finished cleanly
+2026-06-04 11:40:29.323 [INFO    ] [App-shutdown tid=18028] Camera barcode scanner stopped
+2026-06-04 11:40:29.387 [INFO    ] [App-shutdown tid=18028] live_image: stopped
+2026-06-04 11:40:29.406 [INFO    ] [App-shutdown tid=18028] Scanner listener stopped
+2026-06-04 11:40:29.414 [INFO    ] [TCPClient-127.0.0.1:8081-reconnect-watchdog tid=13972] Connection watchdog stopped for VisionClient_TRIG
+2026-06-04 11:40:29.415 [INFO    ] [TCPClient-127.0.0.1:8080-reconnect-watchdog tid=15844] Connection watchdog stopped for VisionClient_ID
+2026-06-04 11:40:29.416 [INFO    ] [TCPClient-127.0.0.1:9000-reconnect-watchdog tid=16912] Connection watchdog stopped for cobotClient
+2026-06-04 11:40:29.419 [INFO    ] [TCP_SERVER-accept-loop tid=20764] ✓ Thread FINISHED (TCP_SERVER-accept-loop)  — exited cleanly
+2026-06-04 11:40:29.419 [INFO    ] [TCP_SERVER-client-127.0.0.1:61379 tid=15180] ✓ Thread FINISHED (TCP_SERVER-client-127.0.0.1:61379)  — exited cleanly
+2026-06-04 11:40:29.433 [INFO    ] [TCPClient-127.0.0.1:8081-reconnect-watchdog tid=13972] ✓ Thread FINISHED (TCPClient-127.0.0.1:8081-reconnect-watchdog)  — exited cleanly
+2026-06-04 11:40:29.435 [INFO    ] [TCPClient-127.0.0.1:8080-reconnect-watchdog tid=15844] ✓ Thread FINISHED (TCPClient-127.0.0.1:8080-reconnect-watchdog)  — exited cleanly
+2026-06-04 11:40:29.440 [INFO    ] [TCPClient-127.0.0.1:9000-reconnect-watchdog tid=16912] ✓ Thread FINISHED (TCPClient-127.0.0.1:9000-reconnect-watchdog)  — exited cleanly
+2026-06-04 11:40:29.753 [INFO    ] [App-shutdown tid=18028] camera_hub: stopped
+2026-06-04 11:40:29.755 [INFO    ] [App-shutdown tid=18028] App: STOPPED
+2026-06-04 11:40:29.759 [INFO    ] [App-shutdown tid=18028] ✓ Thread FINISHED (App-shutdown)  — exited cleanly
+2026-06-04 11:40:30.071 [WARNING ] [MainThread tid=11924] App.stop() called but not running

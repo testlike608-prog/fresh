@@ -50,6 +50,7 @@ INCLUDE_PACKAGES = [
     "gui_log_bridge",
     "gui_settings",
     "config",
+    "PIL",
 ]
 
 
