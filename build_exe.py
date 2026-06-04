@@ -50,7 +50,13 @@ INCLUDE_PACKAGES = [
     "gui_log_bridge",
     "gui_settings",
     "config",
+    "barcode_utils",
+    "camera_hub",
     "PIL",
+    "serial",
+    "cv2",
+    "pyzbar",
+    "zxingcpp",
 ]
 
 
