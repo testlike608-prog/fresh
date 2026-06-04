@@ -100,6 +100,9 @@ def _decode_loop(stop_event: threading.Event):
             scanner.last_barcode = barcode
             scanner.flag_barcode = True
             log.info(f"[CameraScanner] ✅ باركود: {barcode!r}  ({result.format}) → queue")
+            time.sleep(3)
+            _last_queued_barcode = None  # بعد 3 ثواني نسمح لنفس الباركود يتكرر لو ظهر تاني 
+           
             break   # نأخد أول باركود بس في الفريم
 
     log.info("[CameraScanner] أوقف.")

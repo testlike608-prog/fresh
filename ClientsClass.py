@@ -704,6 +704,22 @@ class App():
         self.is_running = False
         self._start_stop_lock = threading.Lock()
 
+    def refresh_config(self):
+        """
+        يعيد قراءة الـ IPs/Ports من config.json ويحدّثها مباشرة على الـ TCP clients.
+        يتنده قبل start() عشان أي تغييرات في Settings تتطبق.
+        آمن — مش بيعمل أي threads أو connections جديدة.
+        """
+        from config import config as _cfg
+        self.VisionClient_TRIG.ip   = _cfg.get("vision_trig_ip",      self.VisionClient_TRIG.ip)
+        self.VisionClient_TRIG.port = _cfg.get("vision_trig_port",     self.VisionClient_TRIG.port)
+        self.VisionClient_ID.ip     = _cfg.get("vision_id_ip",         self.VisionClient_ID.ip)
+        self.VisionClient_ID.port   = _cfg.get("vision_id_port",       self.VisionClient_ID.port)
+        self.cobotClient.ip         = _cfg.get("cobot_ip",             self.cobotClient.ip)
+        self.cobotClient.port       = _cfg.get("cobot_port",           self.cobotClient.port)
+        self.triggerserver.ip       = _cfg.get("trigger_server_ip",    self.triggerserver.ip)
+        self.triggerserver.port     = _cfg.get("trigger_server_port",  self.triggerserver.port)
+
     def _set_stage(self, stage, **extra):
         """ضبط الـ stage الحالي + أي حقول إضافية بـ thread-safe."""
         with self._state_lock:
@@ -903,7 +919,7 @@ class App():
         # 1. إرسال رقم البرنامج للكوبوت
         self._set_stage(AppStage.SENDING_PROGRAM, current_program=program)
         log.info(f"[SEQ] → cobot: send program={program}")
-        self.cobotClient.send_request(program)
+        self.cobotClient.send_only(program)
         log.info(f"[SEQ] ← cobot: ack program={program}")
 
         list_of_results = []
@@ -981,11 +997,11 @@ class App():
 
         while not self._stop_app.is_set():
             try:
-                log.info(f"Sequance worker started and waiting for barcode in vision_queue...")
+                #log.info(f"Sequance worker started and waiting for barcode in vision_queue...")
                 barcode = self.vision_queue.get(timeout=0.5)
                 log.info(f"Sequance worker started for barcode: {barcode}")
             except queue.Empty:
-                log.info("Sequance worker started but no barcode received within timeout period")
+                #log.info("Sequance worker started but no barcode received within timeout period")
                 continue
 
             try:
@@ -1070,19 +1086,24 @@ class App():
             _scan_mode = _cfg.get("scan_mode", "manual")
 
             # ── camera_hub: نفتح الكاميرا مرة واحدة بس لكل المستهلكين ──
+            # camera_hub بيشتغل دايماً عشان Live Preview في Flutter
+            # لكن wait_for_frame (اللي بياخد لحد 6 ثواني) بيشتغل بس في camera mode
             _hub_ok = False
             try:
                 import camera_hub
-                # نستخدم camera_index فقط (نفس المفتاح في settings)
                 _cam_idx = int(_cfg.get("camera_index", 1))
                 camera_hub.start(camera_index=_cam_idx)
-                # ننتظر الفريم الأول قبل ما نشغّل camera_barcode
-                # (فتح الكاميرا على Windows بياخد 1-2 ثانية)
-                _hub_ok = camera_hub.wait_for_frame(timeout=6.0)
-                if _hub_ok:
-                    log.info(f"camera_hub: ready (camera {_cam_idx})")
+                if _scan_mode == "camera":
+                    # camera mode: لازم ننتظر الكاميرا قبل ما نقرأ باركودات
+                    _hub_ok = camera_hub.wait_for_frame(timeout=6.0)
+                    if _hub_ok:
+                        log.info(f"camera_hub: ready for barcode scanning (camera {_cam_idx})")
+                    else:
+                        log.error(f"camera_hub: camera {_cam_idx} لم تستجب — تأكد من الاتصال")
                 else:
-                    log.error(f"camera_hub: camera {_cam_idx} لم تستجب — تأكد من الاتصال")
+                    # manual mode: بنشغّل الكاميرا للـ Live Preview بدون انتظار
+                    _hub_ok = True
+                    log.info(f"camera_hub: started for live preview (camera {_cam_idx})")
             except Exception as _hub_err:
                 log.warning(f"camera_hub.start failed: {_hub_err}")
 

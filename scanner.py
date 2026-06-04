@@ -29,8 +29,8 @@ def _on_key_event(e):
                 barcode = normalize_barcode(raw)
                 if not barcode:
                     pass  # فضي بعد الـ normalize — تجاهل
-                elif barcode == last_barcode:
-                    print(f"تم قراءة نفس الباركود مرة أخرى: {barcode} — تجاهل")
+                #elif barcode == last_barcode:
+                    #print(f"تم قراءة نفس الباركود مرة أخرى: {barcode} — تجاهل")
                 else:
                     if raw != barcode:
                         print(f"QR→SN: {raw!r}  →  {barcode!r}")
